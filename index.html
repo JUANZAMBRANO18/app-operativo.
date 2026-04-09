@@ -1,2488 +1,701 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AOP - Asistente Operativo Policial | Ley 1801</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ===== RESET & BASE ===== */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --cyber-bg: #020617;
-  --cyber-bg-2: #0a0e1a;
-  --cyber-bg-3: #0f172a;
-  --cyber-blue: #3b82f6;
-  --cyber-cyan: #06b6d4;
-  --cyber-green: #10b981;
-  --cyber-red: #ef4444;
-  --cyber-yellow: #f59e0b;
-  --cyber-purple: #8b5cf6;
-  --cyber-pink: #ec4899;
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(59, 130, 246, 0.2);
-  --glass-hover: rgba(59, 130, 246, 0.1);
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --sidebar-width: 260px;
-  --sidebar-collapsed: 70px;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--cyber-bg);
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* ===== CYBER GRID BACKGROUND ===== */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-image:
-    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--cyber-bg); }
-::-webkit-scrollbar-thumb { background: var(--cyber-blue); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cyber-cyan); }
-
-/* ===== SIDEBAR ===== */
-.sidebar {
-  position: fixed;
-  top: 0; left: 0;
-  width: var(--sidebar-width);
-  height: 100vh;
-  background: rgba(10, 14, 26, 0.95);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--glass-border);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--glass-border);
-  text-align: center;
-}
-
-.sidebar-logo {
-  width: 60px; height: 60px;
-  margin: 0 auto 12px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-cyan));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  animation: logoPulse 3s ease-in-out infinite;
-}
-
-@keyframes logoPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(6, 182, 212, 0.2); }
-}
-
-.sidebar-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 1px;
-}
-
-.sidebar-subtitle {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--cyber-cyan);
-  margin-top: 4px;
-  letter-spacing: 2px;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 16px 12px;
-  overflow-y: auto;
-}
-
-.nav-section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 12px 12px 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  margin: 4px 0;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0;
-  width: 3px; height: 100%;
-  background: var(--cyber-blue);
-  border-radius: 0 3px 3px 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.nav-item:hover {
-  background: var(--glass-hover);
-  color: var(--text-primary);
-}
-
-.nav-item.active {
-  background: rgba(59, 130, 246, 0.15);
-  color: var(--cyber-blue);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.nav-item.active::before { opacity: 1; }
-
-.nav-icon {
-  width: 20px; height: 20px;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.nav-item.active .nav-icon { opacity: 1; }
-
-.nav-badge {
-  margin-left: auto;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  background: var(--cyber-red);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-weight: 600;
-}
-
-.sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid var(--glass-border);
-}
-
-.officer-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: var(--glass-bg);
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-}
-
-.officer-avatar {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-
-.officer-info { flex: 1; }
-.officer-name { font-size: 13px; font-weight: 600; }
-.officer-rank { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cyber-cyan); }
-
-/* ===== MAIN CONTENT ===== */
-.main-content {
-  margin-left: var(--sidebar-width);
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
-
-/* ===== TOP BAR ===== */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  padding: 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(2, 6, 23, 0.8);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.topbar-left { display: flex; align-items: center; gap: 16px; }
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.page-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.page-breadcrumb {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.topbar-right { display: flex; align-items: center; gap: 12px; }
-
-.topbar-clock {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  color: var(--cyber-cyan);
-  background: var(--glass-bg);
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--glass-border);
-}
-
-.topbar-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--cyber-green);
-  padding: 6px 12px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 20px;
-}
-
-.status-dot {
-  width: 6px; height: 6px;
-  background: var(--cyber-green);
-  border-radius: 50%;
-  animation: statusBlink 2s ease-in-out infinite;
-}
-
-@keyframes statusBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.topbar-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-}
-
-.topbar-btn:hover {
-  background: var(--glass-hover);
-  color: var(--text-primary);
-  border-color: var(--cyber-blue);
-}
-
-/* ===== PAGE CONTENT ===== */
-.page-content { padding: 24px 32px; }
-
-/* ===== MODULE PAGES ===== */
-.module-page { display: none; }
-.module-page.active { display: block; animation: fadeInPage 0.4s ease; }
-
-@keyframes fadeInPage {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== DASHBOARD ===== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  padding: 20px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--cyber-blue), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.1);
-}
-
-.stat-card:hover::after { opacity: 1; }
-
-.stat-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.stat-icon {
-  width: 40px; height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.stat-icon.blue { background: rgba(59, 130, 246, 0.15); color: var(--cyber-blue); }
-.stat-icon.cyan { background: rgba(6, 182, 212, 0.15); color: var(--cyber-cyan); }
-.stat-icon.green { background: rgba(16, 185, 129, 0.15); color: var(--cyber-green); }
-.stat-icon.yellow { background: rgba(245, 158, 11, 0.15); color: var(--cyber-yellow); }
-.stat-icon.red { background: rgba(239, 68, 68, 0.15); color: var(--cyber-red); }
-.stat-icon.purple { background: rgba(139, 92, 246, 0.15); color: var(--cyber-purple); }
-
-.stat-trend {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
-.stat-trend.up { background: rgba(16, 185, 129, 0.1); color: var(--cyber-green); }
-.stat-trend.down { background: rgba(239, 68, 68, 0.1); color: var(--cyber-red); }
-
-.stat-value {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-/* ===== GLASS CARD ===== */
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.glass-card-header {
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.glass-card-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.glass-card-body { padding: 24px; }
-
-/* ===== FORM ELEMENTS ===== */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-.form-group { margin-bottom: 16px; }
-
-.form-label {
-  display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-
-.form-input, .form-select, .form-textarea {
-  width: 100%;
-  padding: 10px 14px;
-  background: rgba(2, 6, 23, 0.6);
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  outline: none;
-  border-color: var(--cyber-blue);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-input::placeholder { color: var(--text-muted); }
-
-.form-textarea {
-  min-height: 120px;
-  resize: vertical;
-  line-height: 1.6;
-}
-
-.form-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
-}
-
-/* ===== BUTTONS ===== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 0; height: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.4s, height 0.4s;
-}
-
-.btn:active::after {
-  width: 300px; height: 300px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-cyan));
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
-}
-
-.btn-secondary {
-  background: var(--glass-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--glass-border);
-}
-
-.btn-secondary:hover {
-  border-color: var(--cyber-blue);
-  background: var(--glass-hover);
-}
-
-.btn-success {
-  background: linear-gradient(135deg, var(--cyber-green), #059669);
-  color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, var(--cyber-red), #dc2626);
-  color: white;
-}
-
-.btn-sm { padding: 6px 14px; font-size: 12px; }
-.btn-lg { padding: 14px 28px; font-size: 16px; }
-.btn-block { width: 100%; }
-
-/* ===== CYBER GLOW BUTTON ===== */
-.btn-glow {
-  background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-cyan));
-  color: white;
-  border: none;
-  padding: 14px 32px;
-  border-radius: 10px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-}
-
-.btn-glow:hover {
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(6, 182, 212, 0.2);
-  transform: translateY(-2px);
-}
-
-/* ===== SEARCH BAR ===== */
-.search-bar {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 14px 20px 14px 48px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  color: var(--text-primary);
-  font-size: 15px;
-  transition: all 0.3s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--cyber-blue);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 0 30px rgba(59, 130, 246, 0.1);
-}
-
-.search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-/* ===== ARTICLE CARD ===== */
-.article-card {
-  background: rgba(2, 6, 23, 0.4);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 12px;
-  transition: all 0.3s;
-  cursor: pointer;
-}
-
-.article-card:hover {
-  border-color: rgba(59, 130, 246, 0.4);
-  background: rgba(59, 130, 246, 0.05);
-  transform: translateX(4px);
-}
-
-.article-number {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--cyber-cyan);
-  margin-bottom: 6px;
-}
-
-.article-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.article-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.article-tags {
-  display: flex;
-  gap: 6px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-}
-
-.tag.info { background: rgba(59, 130, 246, 0.15); color: var(--cyber-blue); }
-.tag.warning { background: rgba(245, 158, 11, 0.15); color: var(--cyber-yellow); }
-.tag.danger { background: rgba(239, 68, 68, 0.15); color: var(--cyber-red); }
-.tag.success { background: rgba(16, 185, 129, 0.15); color: var(--cyber-green); }
-
-/* ===== TIMELINE ===== */
-.timeline { position: relative; padding-left: 32px; }
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 12px; top: 0;
-  width: 2px; height: 100%;
-  background: linear-gradient(to bottom, var(--cyber-blue), var(--cyber-cyan), transparent);
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.timeline-dot {
-  position: absolute;
-  left: -26px; top: 4px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: var(--cyber-blue);
-  border: 2px solid var(--cyber-bg);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-}
-
-.timeline-time {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.timeline-content {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-/* ===== SCENARIO CARD (Simulator) ===== */
-.scenario-card {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.05));
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 20px;
-}
-
-.scenario-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.scenario-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--cyber-red);
-}
-
-.scenario-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.scenario-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 20px;
-}
-
-.scenario-options { display: flex; flex-direction: column; gap: 10px; }
-
-.scenario-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  background: rgba(2, 6, 23, 0.5);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-}
-
-.scenario-option:hover {
-  border-color: var(--cyber-blue);
-  background: rgba(59, 130, 246, 0.08);
-}
-
-.scenario-option.correct {
-  border-color: var(--cyber-green);
-  background: rgba(16, 185, 129, 0.1);
-}
-
-.scenario-option.incorrect {
-  border-color: var(--cyber-red);
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.option-letter {
-  width: 28px; height: 28px;
-  border-radius: 6px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-/* ===== CHECKLIST ===== */
-.checklist-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.checklist-item:last-child { border-bottom: none; }
-
-.custom-checkbox {
-  width: 20px; height: 20px;
-  border: 2px solid var(--glass-border);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.custom-checkbox.checked {
-  background: var(--cyber-green);
-  border-color: var(--cyber-green);
-}
-
-.checklist-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.checklist-text.checked {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-/* ===== REPORT OUTPUT ===== */
-.report-output {
-  background: rgba(2, 6, 23, 0.8);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 24px;
-  font-family: 'Inter', sans-serif;
-  line-height: 1.8;
-  font-size: 14px;
-  white-space: pre-wrap;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.report-section-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--cyber-cyan);
-  margin: 16px 0 8px;
-}
-
-.report-section-title:first-child { margin-top: 0; }
-
-/* ===== GEO MAP PLACEHOLDER ===== */
-.geo-map {
-  width: 100%;
-  height: 300px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.geo-map::before {
-  content: '';
-  position: absolute;
-  width: 200px; height: 200px;
-  border: 2px solid rgba(59, 130, 246, 0.2);
-  border-radius: 50%;
-  animation: geoPulse 3s ease-in-out infinite;
-}
-
-.geo-map::after {
-  content: '';
-  position: absolute;
-  width: 100px; height: 100px;
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 50%;
-  animation: geoPulse 3s ease-in-out infinite 0.5s;
-}
-
-@keyframes geoPulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.2); opacity: 0.2; }
-}
-
-.geo-coords {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--cyber-cyan);
-  z-index: 1;
-  background: rgba(2, 6, 23, 0.8);
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--glass-border);
-}
-
-.geo-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  z-index: 1;
-  margin-top: 8px;
-}
-
-/* ===== LOADING SPINNER ===== */
-.cyber-spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--glass-border);
-  border-top-color: var(--cyber-blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 20px auto;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ===== TYPING ANIMATION ===== */
-.typing-indicator {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.typing-dot {
-  width: 6px; height: 6px;
-  background: var(--cyber-blue);
-  border-radius: 50%;
-  animation: typing 1.4s infinite;
-}
-
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-6px); opacity: 1; }
-}
-
-/* ===== TOAST NOTIFICATIONS ===== */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toast {
-  background: rgba(10, 14, 26, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  animation: toastIn 0.3s ease;
-  min-width: 280px;
-}
-
-.toast.success { border-left: 3px solid var(--cyber-green); }
-.toast.error { border-left: 3px solid var(--cyber-red); }
-.toast.info { border-left: 3px solid var(--cyber-blue); }
-
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(100px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* ===== MODAL ===== */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 5000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-overlay.active { display: flex; }
-
-.modal {
-  background: var(--cyber-bg-2);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  animation: modalIn 0.3s ease;
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.modal-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.modal-close:hover { color: var(--text-primary); background: var(--glass-bg); }
-
-.modal-body { padding: 24px; }
-
-.modal-footer {
-  padding: 16px 24px;
-  border-top: 1px solid var(--glass-border);
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.empty-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.empty-desc {
-  font-size: 14px;
-  color: var(--text-muted);
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-/* ===== TWO COLUMN LAYOUT ===== */
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-/* ===== PROGRESS BAR ===== */
-.progress-bar {
-  height: 6px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-cyan));
-  border-radius: 3px;
-  transition: width 0.5s ease;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .two-col { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; }
-  .menu-toggle { display: flex; }
-  .page-content { padding: 16px; }
-  .topbar { padding: 12px 16px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .form-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .topbar-right .topbar-clock { display: none; }
-}
-
-/* ===== MOBILE OVERLAY ===== */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.sidebar-overlay.active { display: block; }
-
-/* ===== ANIMATIONS ===== */
-.fade-in {
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.slide-up {
-  animation: slideUp 0.5s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== QUICK ACTION CARDS ===== */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.quick-action-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-align: center;
-}
-
-.quick-action-card:hover {
-  border-color: var(--cyber-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
-}
-
-.quick-action-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.quick-action-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.quick-action-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* ===== TABLE ===== */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.data-table td {
-  padding: 12px 16px;
-  font-size: 13px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.data-table tr:hover td {
-  background: var(--glass-hover);
-}
-
-/* ===== TAB SYSTEM ===== */
-.tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--glass-border);
-  padding-bottom: 0;
-}
-
-.tab {
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-  margin-bottom: -1px;
-}
-
-.tab:hover { color: var(--text-primary); }
-
-.tab.active {
-  color: var(--cyber-blue);
-  border-bottom-color: var(--cyber-blue);
-}
-
-.tab-content { display: none; }
-.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-
-/* ===== ALERT BOX ===== */
-.alert {
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.alert-info {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: var(--cyber-blue);
-}
-
-.alert-warning {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  color: var(--cyber-yellow);
-}
-
-.alert-success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  color: var(--cyber-green);
-}
-
-/* ===== MEDICIÓN INDICATOR ===== */
-.mediation-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(139, 92, 246, 0.15);
-  color: var(--cyber-purple);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-}
-
-/* ===== SCORE DISPLAY ===== */
-.score-display {
-  text-align: center;
-  padding: 30px;
-}
-
-.score-circle {
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  border: 4px solid var(--glass-border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-  position: relative;
-}
-
-.score-circle::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 4px solid transparent;
-  border-top-color: var(--cyber-green);
-  animation: spin 1.5s linear infinite;
-}
-
-.score-value {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--cyber-green);
-}
-
-.score-label {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* ===== FOOTER ===== */
-.app-footer {
-  padding: 20px 32px;
-  border-top: 1px solid var(--glass-border);
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-}
-
-/* ===== PRINT STYLES ===== */
-@media print {
-  .sidebar, .topbar, .btn, .menu-toggle { display: none !important; }
-  .main-content { margin-left: 0 !important; }
-  body { background: white; color: black; }
-  .glass-card { border: 1px solid #ccc; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APP OPERATIVO | Sistema Táctico Policial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #0f1625 100%);
+            color: #e8edf5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(10, 20, 35, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 100, 255, 0.1) inset;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+        }
+
+        .app-title h1 {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 114, 255, 0.5);
+        }
+
+        .app-title span {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b8cae;
+            letter-spacing: 3px;
+            margin-top: 4px;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-box {
+            background: rgba(0, 30, 60, 0.6);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box i {
+            color: #00a6ff;
+            font-size: 0.9rem;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box input::placeholder {
+            color: #4a6a8a;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 50, 100, 0.4);
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .user-profile i {
+            font-size: 1.5rem;
+            color: #00a6ff;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .disconnect-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 70, 70, 0.5);
+            color: #ff6b6b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .disconnect-btn:hover {
+            background: rgba(255, 70, 70, 0.2);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .dash-card {
+            background: linear-gradient(145deg, rgba(0, 40, 70, 0.6), rgba(0, 20, 40, 0.8));
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 180, 255, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 100, 255, 0.2);
+            background: rgba(0, 60, 100, 0.5);
+        }
+
+        .dash-card i {
+            font-size: 1.6rem;
+            color: #00a6ff;
+            text-shadow: 0 0 15px rgba(0, 166, 255, 0.6);
+        }
+
+        .dash-card .label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #b0cde0;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+        }
+
+        /* Left Content */
+        .left-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .system-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .system-badge {
+            background: linear-gradient(135deg, #0066cc, #003366);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border: 1px solid #00a6ff;
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.3);
+        }
+
+        .tags {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tag {
+            background: rgba(0, 100, 200, 0.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            color: #a0d0ff;
+        }
+
+        .directive-panel {
+            background: linear-gradient(145deg, rgba(0, 40, 70, 0.5), rgba(0, 15, 30, 0.7));
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(0, 150, 255, 0.15);
+            backdrop-filter: blur(5px);
+        }
+
+        .directive-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .directive-title i {
+            color: #ffd700;
+        }
+
+        .protocol-text {
+            background: rgba(0, 20, 40, 0.6);
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00a6ff;
+        }
+
+        .protocol-text p {
+            margin-bottom: 8px;
+            color: #c0daf0;
+        }
+
+        .protocol-text strong {
+            color: #00c6ff;
+        }
+
+        .system-specs {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 30, 60, 0.5);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .spec-item i {
+            color: #00a6ff;
+        }
+
+        .alert-box {
+            background: rgba(255, 70, 70, 0.1);
+            border: 1px solid rgba(255, 100, 100, 0.4);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .alert-box i {
+            font-size: 1.5rem;
+            color: #ff6b6b;
+        }
+
+        .alert-text {
+            color: #ffb0b0;
+        }
+
+        .alert-text strong {
+            color: #ff6b6b;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .time-location-card {
+            background: linear-gradient(145deg, #001a30, #001020);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(0, 150, 255, 0.25);
+            text-align: center;
+        }
+
+        .time-display {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ffaa;
+            text-shadow: 0 0 20px rgba(0, 255, 170, 0.5);
+            letter-spacing: 4px;
+        }
+
+        .date-display {
+            color: #8ab0d0;
+            margin: 8px 0 16px;
+        }
+
+        .coordinates {
+            background: rgba(0, 40, 80, 0.5);
+            padding: 12px;
+            border-radius: 12px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .coordinates .coord {
+            color: #00c6ff;
+            font-size: 1.2rem;
+        }
+
+        .attention-badge {
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(0, 200, 255, 0.1);
+            border-radius: 30px;
+            color: #80d0ff;
+            border: 1px solid rgba(0, 150, 255, 0.3);
+        }
+
+        .tactical-sim-card {
+            background: linear-gradient(145deg, #0a1a2a, #051020);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #ffd70033;
+        }
+
+        .tactical-sim-card h3 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sim-preview {
+            background: #00000033;
+            border-radius: 12px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #ffd70066;
+            color: #b0b0b0;
+            margin-bottom: 12px;
+        }
+
+        .btn-sim {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-sim:hover {
+            background: #ffe44d;
+            box-shadow: 0 0 20px #ffd70066;
+        }
+
+        .juridical-ref {
+            background: rgba(0, 40, 80, 0.5);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            text-align: center;
+        }
+
+        .juridical-ref i {
+            color: #00a6ff;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .records-counter {
+            background: rgba(0, 200, 100, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #00cc6640;
+        }
+
+        .records-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #00ff88;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* MIT Modules */
+        .mit-modules {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .mit-card {
+            background: rgba(0, 20, 40, 0.6);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .mit-card .mit-code {
+            color: #00a6ff;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .mit-card .mit-desc {
+            font-size: 0.85rem;
+            color: #b0cde0;
+            margin-top: 6px;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 150, 255, 0.2);
+            font-size: 0.8rem;
+            color: #6b8cae;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .protocol-badge {
+            background: #003366;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #a0d0ff;
+        }
+
+        .version {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00c6ff;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-grid {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<!-- TOAST CONTAINER -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">🛡️</div>
-    <div class="sidebar-title">AOP v2.0</div>
-    <div class="sidebar-subtitle">LEY 1801 DE 2016</div>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <div class="nav-item active" onclick="navigateTo('dashboard', this)">
-      <span class="nav-icon">📊</span>
-      <span>Dashboard</span>
-    </div>
-    <div class="nav-item" onclick="navigateTo('relatos', this)">
-      <span class="nav-icon">📝</span>
-      <span>Generador Relatos</span>
-      <span class="nav-badge">IA</span>
-    </div>
-    <div class="nav-item" onclick="navigateTo('rnmc', this)">
-      <span class="nav-icon">📚</span>
-      <span>Portal RNMC</span>
-    </div>
-
-    <div class="nav-section-label">Herramientas</div>
-    <div class="nav-item" onclick="navigateTo('simulador', this)">
-      <span class="nav-icon">🎯</span>
-      <span>Simulador Táctico</span>
-    </div>
-    <div class="nav-item" onclick="navigateTo('defensa', this)">
-      <span class="nav-icon">⚖️</span>
-      <span>Defensa Jurídica</span>
-    </div>
-    <div class="nav-item" onclick="navigateTo('archivo', this)">
-      <span class="nav-icon">🗄️</span>
-      <span>Archivo Digital</span>
-      <span class="nav-badge" style="background:var(--cyber-blue)">3</span>
-    </div>
-  </nav>
-
-  <div class="sidebar-footer">
-    <div class="officer-card">
-      <div class="officer-avatar">👮</div>
-      <div class="officer-info">
-        <div class="officer-name">Oficial en Servicio</div>
-        <div class="officer-rank">PLACA: 123456</div>
-      </div>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN CONTENT -->
-<main class="main-content">
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-      <div>
-        <div class="page-title" id="pageTitle">Dashboard Operativo</div>
-        <div class="page-breadcrumb" id="pageBreadcrumb">AOP / Inicio</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-clock" id="topbarClock">00:00:00</div>
-      <div class="topbar-status">
-        <span class="status-dot"></span>
-        EN SERVICIO
-      </div>
-      <button class="topbar-btn" onclick="showToast('Sincronizando datos...', 'info')">🔄 Sync</button>
-    </div>
-  </header>
-
-  <!-- PAGE CONTENT -->
-  <div class="page-content">
-
-    <!-- ==================== DASHBOARD ==================== -->
-    <div class="module-page active" id="page-dashboard">
-      <!-- Quick Actions -->
-      <div class="quick-actions slide-up">
-        <div class="quick-action-card" onclick="navigateTo('relatos', document.querySelectorAll('.nav-item')[1])">
-          <div class="quick-action-icon">📝</div>
-          <div class="quick-action-title">Nuevo Relato</div>
-          <div class="quick-action-desc">Generar narrativa con IA</div>
-        </div>
-        <div class="quick-action-card" onclick="navigateTo('rnmc', document.querySelectorAll('.nav-item')[2])">
-          <div class="quick-action-icon">📚</div>
-          <div class="quick-action-title">Consultar Ley</div>
-          <div class="quick-action-desc">Buscar artículo específico</div>
-        </div>
-        <div class="quick-action-card" onclick="navigateTo('simulador', document.querySelectorAll('.nav-item')[3])">
-          <div class="quick-action-icon">🎯</div>
-          <div class="quick-action-title">Entrenamiento</div>
-          <div class="quick-action-desc">Simulador táctico IA</div>
-        </div>
-        <div class="quick-action-card" onclick="navigateTo('defensa', document.querySelectorAll('.nav-item')[4])">
-          <div class="quick-action-icon">⚖️</div>
-          <div class="quick-action-title">Defensa</div>
-          <div class="quick-action-desc">Checklists y guías</div>
-        </div>
-      </div>
-
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-card fade-in">
-          <div class="stat-card-header">
-            <div class="stat-icon blue">📋</div>
-            <span class="stat-trend up">+12%</span>
-          </div>
-          <div class="stat-value">47</div>
-          <div class="stat-label">Relatos Generados</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay:0.1s">
-          <div class="stat-card-header">
-            <div class="stat-icon cyan">🔍</div>
-            <span class="stat-trend up">+8%</span>
-          </div>
-          <div class="stat-value">156</div>
-          <div class="stat-label">Consultas RNMC</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay:0.2s">
-          <div class="stat-card-header">
-            <div class="stat-icon green">🎯</div>
-            <span class="stat-trend up">+15%</span>
-          </div>
-          <div class="stat-value">89%</div>
-          <div class="stat-label">Precisión Simulador</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay:0.3s">
-          <div class="stat-card-header">
-            <div class="stat-icon yellow">⚡</div>
-          </div>
-          <div class="stat-value">23</div>
-          <div class="stat-label">Días de Servicio</div>
-        </div>
-      </div>
-
-      <!-- Two Column Layout -->
-      <div class="two-col">
-        <!-- Geolocation -->
-        <div class="glass-card slide-up">
-          <div class="glass-card-header">
-            <div class="glass-card-title">📍 Geolocalización</div>
-            <button class="btn btn-sm btn-secondary" onclick="updateGeo()">Actualizar</button>
-          </div>
-          <div class="glass-card-body">
-            <div class="geo-map">
-              <div class="geo-coords" id="geoCoords">
-                LAT: 4.7110 | LON: -74.0721
-              </div>
-              <div class="geo-label">Precisión: ~5 metros</div>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-title">
+                <h1>APP OPERATIVO</h1>
+                <span>APLICACIÓN MÁQUINARIA</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="glass-card slide-up" style="animation-delay:0.1s">
-          <div class="glass-card-header">
-            <div class="glass-card-title">🕐 Actividad Reciente</div>
-          </div>
-          <div class="glass-card-body">
-            <div class="timeline">
-              <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-time">14:32 HRS</div>
-                <div class="timeline-content">Relato generado — Art. 102 Num. 7</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--cyber-cyan)"></div>
-                <div class="timeline-time">13:15 HRS</div>
-                <div class="timeline-content">Consulta RNMC — Art. 35 (Ruidos)</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--cyber-green)"></div>
-                <div class="timeline-time">11:45 HRS</div>
-                <div class="timeline-content">Simulación completada — Score: 92%</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--cyber-yellow)"></div>
-                <div class="timeline-time">09:30 HRS</div>
-                <div class="timeline-content">Inicio de turno — Zona 7</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== GENERADOR DE RELATOS ==================== -->
-    <div class="module-page" id="page-relatos">
-      <div class="alert alert-info">
-        💡 Complete el formulario para generar un relato jurídico con IA. Los campos marcados con * son obligatorios.
-      </div>
-
-      <div class="glass-card">
-        <div class="glass-card-header">
-          <div class="glass-card-title">📝 Generador de Relatos con IA</div>
-          <span class="mediation-badge">⚡ Motor Gemini</span>
-        </div>
-        <div class="glass-card-body">
-          <!-- Tab System -->
-          <div class="tabs">
-            <div class="tab active" onclick="switchTab(this, 'tab-datos')">Datos del Hecho</div>
-            <div class="tab" onclick="switchTab(this, 'tab-ciudadano')">Datos del Ciudadano</div>
-            <div class="tab" onclick="switchTab(this, 'tab-descargos')">Descargos y Contexto</div>
-          </div>
-
-          <!-- Tab: Datos del Hecho -->
-          <div class="tab-content active" id="tab-datos">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Artículo *</label>
-                <select class="form-select" id="relatoArticulo">
-                  <option value="">Seleccionar artículo...</option>
-                  <option value="35">Art. 35 — Comportamientos contrarios a la tranquilidad</option>
-                  <option value="36">Art. 36 — Comportamientos contrarios al cuidado del medio ambiente</option>
-                  <option value="47">Art. 47 — Comportamientos contrarios a la salud pública</option>
-                  <option value="68">Art. 68 — Comportamientos contrarios a los recursos naturales</option>
-                  <option value="75">Art. 75 — Comportamientos contrarios a la actividad urbanística</option>
-                  <option value="79">Art. 79 — Comportamientos contrarios al espacio público</option>
-                  <option value="84">Art. 84 — Comportamientos contrarios al patrimonio público</option>
-                  <option value="92">Art. 92 — Comportamientos contrarios a la seguridad y convivencia</option>
-                  <option value="102">Art. 102 — Comportamientos contrarios a la seguridad</option>
-                  <option value="116">Art. 116 — Comportamientos contrarios a la convivencia en espectáculos</option>
-                  <option value="144">Art. 144 — Comportamientos contrarios a la convivencia familiar</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Numeral / Literal</label>
-                <select class="form-select" id="relatoNumeral">
-                  <option value="">Seleccionar numeral...</option>
-                  <option value="1">Numeral 1</option>
-                  <option value="2">Numeral 2</option>
-                  <option value="3">Numeral 3</option>
-                  <option value="4">Numeral 4</option>
-                  <option value="5">Numeral 5</option>
-                  <option value="6">Numeral 6</option>
-                  <option value="7">Numeral 7</option>
-                  <option value="8">Numeral 8</option>
-                  <option value="9">Numeral 9</option>
-                  <option value="10">Numeral 10</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Hora del Hecho (Militar) *</label>
-                <input type="text" class="form-input" id="relatoHora" placeholder="Ej: 14:30 HRS" maxlength="10">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Zona de Atención *</label>
-                <input type="text" class="form-input" id="relatoZona" placeholder="Ej: Zona 7 - UPZ 71">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Narración de los Hechos *</label>
-              <textarea class="form-textarea" id="relatoHechos" placeholder="Describa los hechos de manera cronológica, detallada y objetiva. Incluya lugar, circunstancias y evidencias observadas..."></textarea>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Medida Correctiva Aplicada</label>
-              <select class="form-select" id="relatoMedida">
-                <option value="">Seleccionar medida...</option>
-                <option value="amonestacion">Amonestación</option>
-                <option value="destruccion">Destrucción del objeto material</option>
-                <option value="decomiso">Decomiso de bienes muebles</option>
-                <option value="restauracion">Restauración del bien</option>
-                <option value="trabajo_comunitario">Trabajo comunitario</option>
-                <option value="multa">Multa general</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Tab: Datos del Ciudadano -->
-          <div class="tab-content" id="tab-ciudadano">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Nombre Completo</label>
-                <input type="text" class="form-input" id="relatoNombre" placeholder="Nombre del ciudadano">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Documento de Identidad</label>
-                <input type="text" class="form-input" id="relatoDoc" placeholder="CC / TI / CE" maxlength="15">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Edad</label>
-                <input type="number" class="form-input" id="relatoEdad" placeholder="Edad" min="1" max="120">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Dirección</label>
-                <input type="text" class="form-input" id="relatoDireccion" placeholder="Dirección de residencia">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Teléfono de Contacto</label>
-                <input type="text" class="form-input" id="relatoTel" placeholder="Teléfono / Celular" maxlength="15">
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab: Descargos -->
-          <div class="tab-content" id="tab-descargos">
-            <div class="form-group">
-              <label class="form-label">Descargos del Ciudadano (Art. 222) *</label>
-              <textarea class="form-textarea" id="relatoDescargos" placeholder="Registre literalmente los descargos manifestados por el ciudadano según lo establecido en el artículo 222 de la Ley 1801 de 2016..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Observaciones Adicionales</label>
-              <textarea class="form-textarea" id="relatoObs" placeholder="Información complementaria, testigos, evidencias fotográficas, etc." style="min-height:80px"></textarea>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap">
-            <button class="btn-glow" onclick="generarRelato()">⚡ Generar Relato con IA</button>
-            <button class="btn btn-secondary" onclick="guardarRelato()">💾 Guardar Borrador</button>
-            <button class="btn btn-secondary" onclick="limpiarFormulario()">🗑️ Limpiar Todo</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generated Report Output -->
-      <div class="glass-card" id="reportOutputCard" style="display:none">
-        <div class="glass-card-header">
-          <div class="glass-card-title">📄 Relato Generado</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-sm btn-secondary" onclick="copiarRelato()">📋 Copiar</button>
-            <button class="btn btn-sm btn-primary" onclick="descargarRelato()">📥 Descargar .txt</button>
-          </div>
-        </div>
-        <div class="glass-card-body">
-          <div class="report-output" id="reportOutput"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== PORTAL RNMC ==================== -->
-    <div class="module-page" id="page-rnmc">
-      <div class="search-bar">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="rnmcSearch" placeholder="Buscar artículo, palabra clave o tema..." oninput="filterArticles()">
-      </div>
-
-      <div id="articlesList">
-        <!-- Articles will be rendered by JS -->
-      </div>
-    </div>
-
-    <!-- ==================== SIMULADOR TÁCTICO ==================== -->
-    <div class="module-page" id="page-simulador">
-      <div class="two-col">
-        <div>
-          <div class="scenario-card">
-            <div class="scenario-header">
-              <span class="scenario-badge">🎯 ESCENARIO 1</span>
-              <span class="tag warning">DIFICULTAD: MEDIA</span>
-            </div>
-            <div class="scenario-title">Intervención por Ruidos Molestos en Zona Residencial</div>
-            <div class="scenario-text">
-              Siendo las 23:45 horas, usted patrulla la Zona 7 cuando recibe una llamada ciudadana por ruidos molestos provenientes de una vivienda. Al llegar, observa una reunión con aproximadamente 30 personas, música a alto volumen y vehículos estacionados en la vía pública. El propietario se encuentra presente.
-            </div>
-            <div class="scenario-options" id="scenarioOptions">
-              <div class="scenario-option" onclick="selectScenario(this, true)">
-                <span class="option-letter">A</span>
-                <span>Identificarse, explicar la norma (Art. 35), solicitar reducción inmediata del ruido y documentar la intervención.</span>
-              </div>
-              <div class="scenario-option" onclick="selectScenario(this, false)">
-                <span class="option-letter">B</span>
-                <span>Ingresar directamente al inmueble sin identificarse y decomisar los equipos de sonido.</span>
-              </div>
-              <div class="scenario-option" onclick="selectScenario(this, false)">
-                <span class="option-letter">C</span>
-                <span>Ignorar la llamada por ser un tema privado entre vecinos.</span>
-              </div>
-              <div class="scenario-option" onclick="selectScenario(this, false)">
-                <span class="option-letter">D</span>
-                <span>Solo amonestar verbalmente sin documentar la intervención.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="scenario-card" style="opacity:0.5">
-            <div class="scenario-header">
-              <span class="scenario-badge">🔒 ESCENARIO 2</span>
-              <span class="tag info">BLOQUEADO</span>
-            </div>
-            <div class="scenario-title">Ocupación Ilegal de Espacio Público</div>
-            <div class="scenario-text">Complete el escenario anterior para desbloquear este caso.</div>
-          </div>
-        </div>
-
-        <!-- Results Panel -->
-        <div>
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div class="glass-card-title">📊 Resultados</div>
-            </div>
-            <div class="glass-card-body">
-              <div class="score-display">
-                <div class="score-circle">
-                  <div class="score-value" id="simScore">0%</div>
-                  <div class="score-label">Puntuación</div>
+            <div class="user-area">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="BUSQUEDA...">
                 </div>
-              </div>
-              <div style="margin-top:16px">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-                  <span style="color:var(--text-secondary)">Escenarios completados</span>
-                  <span style="color:var(--cyber-cyan);font-family:'JetBrains Mono',monospace">0 / 10</span>
+                <div class="user-profile">
+                    <i class="fas fa-user-shield"></i>
+                    <div class="user-info">
+                        <span class="user-name">JUAN TOSTADO</span>
+                        <button class="disconnect-btn">DESCONECTAR</button>
+                    </div>
                 </div>
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width:0%" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <div class="dash-card">
+                <i class="fas fa-chart-pie"></i>
+                <span class="label">GENERALIZACIÓN DE RECURSOS</span>
+            </div>
+            <div class="dash-card">
+                <i class="fas fa-map-marked-alt"></i>
+                <span class="label">PORTAL RANGE</span>
+            </div>
+            <div class="dash-card">
+                <i class="fas fa-gamepad"></i>
+                <span class="label">SIMULADOR TÁCTICO</span>
+            </div>
+            <div class="dash-card">
+                <i class="fas fa-gavel"></i>
+                <span class="label">DEFENSAS JURÍDICAS</span>
+            </div>
+            <div class="dash-card">
+                <i class="fas fa-folder-open"></i>
+                <span class="label">ARCHIVO DE COMPARTESIONES</span>
+            </div>
+            <div class="dash-card">
+                <i class="fas fa-file-alt"></i>
+                <span class="label">RESUMEN SÚA</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-layout">
+            <div class="left-content">
+                <div class="system-header">
+                    <div class="system-badge">
+                        <i class="fas fa-shield-alt"></i> SISTEMA ACTIVO
+                    </div>
+                    <div class="tags">
+                        <span class="tag">EN ARTE</span>
+                        <span class="tag">CLIMAX</span>
+                        <span class="tag">SECTOR</span>
+                        <span class="tag">CURRENTS</span>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div class="glass-card-title">🎓 Retroalimentación</div>
+                <div class="directive-panel">
+                    <div class="directive-title">
+                        <i class="fas fa-scroll"></i> GENERAL RELATO
+                        <span style="font-size:0.9rem; margin-left:auto; opacity:0.7;">PROYECTO LEGAL CON LA</span>
+                    </div>
+                    <div style="font-weight:600; margin-bottom:12px; color:#00c6ff;">
+                        <i class="fas fa-gavel"></i> DIRECTIVA 3ª PROCEDIMIENTO
+                    </div>
+                    
+                    <div class="protocol-text">
+                        <p><strong>PROTOCOLO 2020-21:</strong> Unión de 32 países en la lucha contra la corrupción y el mal uso de recursos humanos.</p>
+                    </div>
+
+                    <div class="system-specs">
+                        <div class="spec-item">
+                            <i class="fas fa-database"></i>
+                            <span>SISTEMA: Q-Cert® integrado</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Base de datos institucional</span>
+                        </div>
+                    </div>
+
+                    <div class="alert-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="alert-text">
+                            <strong>ALERTE:</strong> Se detecta un incremento del 10% en los resultados por encima de la factura de derechos en el futuro 6.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MIT Modules -->
+                <div class="mit-modules">
+                    <div class="mit-card">
+                        <div class="mit-code">MIT_1B</div>
+                        <div class="mit-desc">PROYECTO DE PERSONAS</div>
+                    </div>
+                    <div class="mit-card">
+                        <div class="mit-code">MIT_2B</div>
+                        <div class="mit-desc">PROYECTO DE VEHÍCULOS</div>
+                    </div>
+                    <div class="mit-card">
+                        <div class="mit-code">MIT_3B</div>
+                        <div class="mit-desc">PROYECTO DE ESTADÍSTICAS</div>
+                    </div>
+                    <div class="mit-card">
+                        <div class="mit-code">MIT_4B</div>
+                        <div class="mit-desc">PROYECTO DE BOMBAS MUNICIPALES</div>
+                    </div>
+                </div>
             </div>
-            <div class="glass-card-body">
-              <div id="feedbackText" style="font-size:14px;color:var(--text-secondary);line-height:1.7">
-                Selecciona una respuesta para recibir retroalimentación pedagógica de la IA.
-              </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="time-location-card">
+                    <div class="time-display" id="liveTime">21:21:37</div>
+                    <div class="date-display">08:00h, 04/03/2025</div>
+                    <div class="coordinates">
+                        <div><i class="fas fa-map-pin"></i> DIRECCIONES / ZONA</div>
+                        <div class="coord">4.300000, -74.150000</div>
+                    </div>
+                    <div class="attention-badge">
+                        <i class="fas fa-bullseye"></i> 100M DE ATENCION
+                    </div>
+                </div>
+
+                <div class="tactical-sim-card">
+                    <h3><i class="fas fa-crosshairs"></i> ENTREGA/MENUTO</h3>
+                    <div class="sim-preview">
+                        <i class="fas fa-play-circle" style="font-size:2rem; opacity:0.5;"></i> SIMULADOR TACTICO
+                    </div>
+                    <button class="btn-sim"><i class="fas fa-play"></i> INICIAR SIMULACIÓN</button>
+                </div>
+
+                <div class="juridical-ref">
+                    <i class="fas fa-shield-virus"></i>
+                    <div style="font-weight:600;">REFERENCIA PROTECCIÓN JURÍDICA</div>
+                    <div style="font-size:0.8rem; opacity:0.8;">REFERENCIA PROTECCIÓN</div>
+                </div>
+
+                <div class="records-counter">
+                    <div style="font-size:0.9rem; color:#b0d0ff;">REGISTROS RECIBIDOS</div>
+                    <div class="records-number">214</div>
+                    <div style="margin-top:5px;">PRESENTES</div>
+                </div>
+
+                <div style="font-size:0.8rem; color:#8ab0d0; text-align:right;">
+                    FACILITADOS DE REGISTRO (LET Nº01)
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- ==================== DEFENSA JURÍDICA ==================== -->
-    <div class="module-page" id="page-defensa">
-      <div class="two-col">
-        <div>
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div class="glass-card-title">✅ Checklist de Legalidad</div>
-              <span class="tag success" id="checklistCount">0 / 8</span>
+        <!-- Footer -->
+        <div class="app-footer">
+            <div class="footer-left">
+                <span>CREARSE POR 2018 ZARRABAN</span>
+                <span class="version">APP OPERATIVO Y4.2.0</span>
             </div>
-            <div class="glass-card-body">
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Identificación plena al ciudadano (nombre, documento)</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Informar el comportamiento sancionado (Art. correspondiente)</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Garantizar derecho de defensa y descargos (Art. 222)</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Proporcionalidad de la medida correctiva</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Registro fotográfico o evidencia material</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Informe escrito con hora militar y zona de atención</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Notificación al ciudadano de la medida aplicada</div>
-              </div>
-              <div class="checklist-item" onclick="toggleCheck(this)">
-                <div class="custom-checkbox"></div>
-                <div class="checklist-text">Verificar si aplica mediación policial (Art. 217)</div>
-              </div>
+            <div class="footer-right">
+                <span class="protocol-badge"><i class="fas fa-certificate"></i> PROTOCOLUS LEY 10651</span>
+                <span>2024 © TODOS LOS DERECHOS RESERVADOS</span>
             </div>
-          </div>
         </div>
-
-        <div>
-          <div class="glass-card">
-            <div class="glass-card-header">
-              <div class="glass-card-title">⚖️ Guía Rápida de Defensa</div>
-            </div>
-            <div class="glass-card-body">
-              <div class="alert alert-warning">
-                ⚠️ Recuerde: Toda intervención debe respetar el debido proceso y los derechos fundamentales del ciudadano.
-              </div>
-
-              <h4 style="font-family:'Space Grotesk',sans-serif;margin-bottom:12px;color:var(--cyber-cyan)">Principios Rectores</h4>
-              <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:20px">
-                <strong style="color:var(--text-primary)">Art. 2:</strong> La policía actúa bajo principios de legalidad, necesidad, proporcionalidad y respeto a los derechos humanos.
-              </div>
-              <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:20px">
-                <strong style="color:var(--text-primary)">Art. 217:</strong> La mediación policial es un mecanismo voluntario para resolver conflictos de convivencia sin imposición de medidas correctivas.
-              </div>
-              <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:20px">
-                <strong style="color:var(--text-primary)">Art. 222:</strong> Todo ciudadano tiene derecho a presentar descargos antes de la imposición de una medida correctiva.
-              </div>
-
-              <h4 style="font-family:'Space Grotesk',sans-serif;margin:16px 0 12px;color:var(--cyber-cyan)">Medidas Correctivas (Art. 223)</h4>
-              <div style="font-size:13px;color:var(--text-secondary);line-height:2">
-                • Amonestación<br>
-                • Decomiso de bienes muebles<br>
-                • Restauración de bienes al estado anterior<br>
-                • Trabajo comunitario<br>
-                • Multa general (1 a 150 SMMLV)<br>
-                • Suspensión o revocatoria de permisos
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- ==================== ARCHIVO DIGITAL ==================== -->
-    <div class="module-page" id="page-archivo">
-      <div class="glass-card">
-        <div class="glass-card-header">
-          <div class="glass-card-title">🗄️ Historial de Reportes</div>
-          <div style="display:flex;gap:8px">
-            <input type="text" class="form-input" placeholder="Buscar reporte..." style="width:200px;padding:6px 12px;font-size:12px">
-            <button class="btn btn-sm btn-secondary">🔍</button>
-          </div>
-        </div>
-        <div class="glass-card-body">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Artículo</th>
-                <th>Ciudadano</th>
-                <th>Medida</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="font-family:'JetBrains Mono',monospace;font-size:12px">2026-04-09 | 14:32</td>
-                <td>Art. 102 Num. 7</td>
-                <td>Juan Pérez - CC 123456</td>
-                <td>Decomiso</td>
-                <td><span class="tag success">Guardado</span></td>
-                <td><button class="btn btn-sm btn-secondary">📄 Ver</button></td>
-              </tr>
-              <tr>
-                <td style="font-family:'JetBrains Mono',monospace;font-size:12px">2026-04-08 | 22:15</td>
-                <td>Art. 35 Num. 1</td>
-                <td>María López - CC 789012</td>
-                <td>Amonestación</td>
-                <td><span class="tag success">Guardado</span></td>
-                <td><button class="btn btn-sm btn-secondary">📄 Ver</button></td>
-              </tr>
-              <tr>
-                <td style="font-family:'JetBrains Mono',monospace;font-size:12px">2026-04-07 | 16:45</td>
-                <td>Art. 79 Num. 3</td>
-                <td>Carlos Ruiz - CC 345678</td>
-                <td>Trabajo Comunitario</td>
-                <td><span class="tag warning">Pendiente</span></td>
-                <td><button class="btn btn-sm btn-secondary">📄 Ver</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="app-footer">
-    AOP v2.0 — Asistente Operativo Policial | Ley 1801 de 2016 | Colombia © 2026
-  </footer>
-</main>
-
-<!-- MODAL: Artículo Detalle -->
-<div class="modal-overlay" id="articleModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalArticleTitle">Artículo</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalArticleBody">
-      <!-- Content injected by JS -->
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
-      <button class="btn btn-primary" onclick="usarArticuloRelato()">📝 Usar en Relato</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ===== DATA =====
-const articlesData = [
-  {
-    id: 35,
-    title: "Comportamientos contrarios a la tranquilidad y el comportamiento pacífico de las personas",
-    desc: "Son comportamientos contrarios a la tranquilidad y el comportamiento pacífico de las personas aquellos que generan perturbaciones en el entorno de convivencia.",
-    tags: [{ text: "Tranquilidad", type: "info" }, { text: "Ruidos", type: "warning" }, { text: "Mediable", type: "success" }],
-    numerals: [
-      { n: 1, text: "Quien concurra a establecimientos públicos sin el permiso del titular o del funcionario competente." },
-      { n: 2, text: "Quien perturbe la tranquilidad de los demás con ruido producido en forma individual o colectiva." },
-      { n: 3, text: "Quien en hora no permitida realice actividades que alteren la tranquilidad." },
-      { n: 4, text: "Quien realice riñas o peleas que no constituyan delito." },
-      { n: 5, text: "Quien profiera gritos, expresiones injuriosas o irrespetuosas." }
-    ],
-    measure: "Amonestación, multa hasta 2 SMMLV, decomiso del objeto material generador del ruido.",
-    mediation: true,
-    tactic: "1. Acercarse de manera profesional e identificarse.\n2. Medir el nivel de ruido con sonómetro si es posible.\n3. Informar al responsable la norma infringida.\n4. Solicitar la reducción inmediata del ruido.\n5. Si persiste, aplicar medida correctiva proporcional.\n6. Documentar toda la intervención."
-  },
-  {
-    id: 79,
-    title: "Comportamientos contrarios al espacio público",
-    desc: "Son comportamientos contrarios al espacio público aquellos que afectan el uso y goce de los bienes de uso público.",
-    tags: [{ text: "Espacio Público", type: "info" }, { text: "Ocupación", type: "warning" }],
-    numerals: [
-      { n: 1, text: "Quien obstruya el espacio público con escombros, materiales de construcción u otros elementos." },
-      { n: 2, text: "Quien realice construcciones u ocupaciones ilegales en el espacio público." },
-      { n: 3, text: "Quien destine el espacio público a usos distintos de su destinación." },
-      { n: 4, text: "Quien obstruya aceras, andenes, ciclovías o vías con objetos o mercancías." }
-    ],
-    measure: "Restauración del espacio público, decomiso, multa hasta 5 SMMLV.",
-    mediation: false,
-    tactic: "1. Verificar la ocupación ilegal.\n2. Identificar al responsable.\n3. Solicitar el desalojo inmediato del espacio.\n4. Si es una estructura, reportar a la autoridad competente.\n5. Documentar con evidencia fotográfica.\n6. Aplicar medida correctiva según gravedad."
-  },
-  {
-    id: 92,
-    title: "Comportamientos contrarios a la seguridad y convivencia",
-    desc: "Son comportamientos contrarios a la seguridad y convivencia aquellos que ponen en riesgo la integridad de las personas.",
-    tags: [{ text: "Seguridad", type: "danger" }, { text: "Armas", type: "danger" }, { text: "No Mediable", type: "danger" }],
-    numerals: [
-      { n: 1, text: "Quien porte armas blancas o elementos cortopunzantes en espacio público sin justificación." },
-      { n: 2, text: "Quien porte armas de fuego sin permiso vigente." },
-      { n: 3, text: "Quien consuma sustancias psicoactivas en espacio público." },
-      { n: 4, text: "Quien realice juegos pirotécnicos sin autorización." }
-    ],
-    measure: "Decomiso, multa hasta 10 SMMLV, arresto hasta 15 días.",
-    mediation: false,
-    tactic: "1. Evaluar el nivel de riesgo.\n2. Solicitar apoyo si es necesario.\n3. Intervenir con protocolos de seguridad.\n4. Decomisar elementos peligrosos.\n5. Capturar si hay flagrancia.\n6. Poner a disposición de la autoridad competente."
-  },
-  {
-    id: 36,
-    title: "Comportamientos contrarios al cuidado y preservación del medio ambiente",
-    desc: "Son comportamientos que atentan contra el medio ambiente y los recursos naturales.",
-    tags: [{ text: "Medio Ambiente", type: "info" }, { text: "Mediable", type: "success" }],
-    numerals: [
-      { n: 1, text: "Quien arroje o deposite basuras, residuos o escombros en sitios no autorizados." },
-      { n: 2, text: "Quien queme basuras o residuos sólidos en espacio público." },
-      { n: 3, text: "Quien contamine fuentes hídricas." }
-    ],
-    measure: "Amonestación, multa hasta 2 SMMLV, restauración del daño.",
-    mediation: true,
-    tactic: "1. Identificar la fuente de contaminación.\n2. Documentar con evidencia fotográfica.\n3. Identificar al responsable.\n4. Informar la norma y solicitar corrección.\n5. Aplicar medida correctiva.\n6. Reportar a autoridades ambientales si es necesario."
-  },
-  {
-    id: 102,
-    title: "Comportamientos contrarios a la seguridad de las personas",
-    desc: "Son comportamientos que ponen en peligro la seguridad e integridad física de las personas.",
-    tags: [{ text: "Seguridad", type: "danger" }, { text: "Peligro", type: "warning" }],
-    numerals: [
-      { n: 1, text: "Quien instale o mantenga instalaciones eléctricas riesgosas." },
-      { n: 2, text: "Quien no cumpla normas de seguridad en edificaciones." },
-      { n: 3, text: "Quien almacene materiales peligrosos sin autorización." },
-      { n: 4, text: "Quien conduzca vehículos en estado de embriaguez." }
-    ],
-    measure: "Multa hasta 15 SMMLV, decomiso, cierre del establecimiento.",
-    mediation: false,
-    tactic: "1. Evaluar la situación de riesgo.\n2. Asegurar el perímetro.\n3. Evacuar si es necesario.\n4. Identificar responsables.\n5. Aplicar medidas correctivas.\n6. Reportar a autoridades competentes."
-  },
-  {
-    id: 144,
-    title: "Comportamientos contrarios a la convivencia familiar",
-    desc: "Son comportamientos que afectan la convivencia y armonía en el ámbito familiar.",
-    tags: [{ text: "Familia", type: "info" }, { text: "Mediable", type: "success" }, { text: "ICA", type: "warning" }],
-    numerals: [
-      { n: 1, text: "Quien ejerza violencia intrafamiliar que no constituya delito." },
-      { n: 2, text: "Quien incumpla deberes de asistencia familiar." },
-      { n: 3, text: "Quien perturbe la convivencia familiar de manera reiterada." }
-    ],
-    measure: "Amonestación, trabajo comunitario, multa hasta 2 SMMLV.",
-    mediation: true,
-    tactic: "1. Separar a las partes en conflicto.\n2. Evaluar riesgo inmediato.\n3. Si hay violencia, activar ruta de atención.\n4. Ofrecer mediación policial.\n5. Si no acepta, aplicar medida correctiva.\n6. Remitir a Comisaría de Familia si es necesario."
-  }
-];
-
-// ===== NAVIGATION =====
-const pageTitles = {
-  dashboard: { title: 'Dashboard Operativo', breadcrumb: 'AOP / Inicio' },
-  relatos: { title: 'Generador de Relatos IA', breadcrumb: 'AOP / Relatos' },
-  rnmc: { title: 'Portal RNMC - Ley 1801', breadcrumb: 'AOP / Consulta Normativa' },
-  simulador: { title: 'Simulador Táctico', breadcrumb: 'AOP / Entrenamiento' },
-  defensa: { title: 'Defensa Jurídica', breadcrumb: 'AOP / Legalidad' },
-  archivo: { title: 'Archivo Digital', breadcrumb: 'AOP / Reportes' }
-};
-
-function navigateTo(page, navEl) {
-  // Update nav
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (navEl) navEl.classList.add('active');
-
-  // Update pages
-  document.querySelectorAll('.module-page').forEach(p => p.classList.remove('active'));
-  const targetPage = document.getElementById('page-' + page);
-  if (targetPage) targetPage.classList.add('active');
-
-  // Update topbar
-  const info = pageTitles[page];
-  if (info) {
-    document.getElementById('pageTitle').textContent = info.title;
-    document.getElementById('pageBreadcrumb').textContent = info.breadcrumb;
-  }
-
-  // Close mobile sidebar
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('active');
-
-  // Special init
-  if (page === 'rnmc') renderArticles();
-}
-
-// ===== SIDEBAR TOGGLE =====
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('active');
-}
-
-// ===== CLOCK =====
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('topbarClock').textContent = `${h}:${m}:${s} HRS`;
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ===== GEOLOCATION =====
-function updateGeo() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude.toFixed(4);
-        const lon = pos.coords.longitude.toFixed(4);
-        document.getElementById('geoCoords').textContent = `LAT: ${lat} | LON: ${lon}`;
-        showToast('Ubicación actualizada', 'success');
-      },
-      () => {
-        showToast('Error al obtener ubicación', 'error');
-      },
-      { enableHighAccuracy: true }
-    );
-  } else {
-    showToast('Geolocalización no disponible', 'error');
-  }
-}
-
-// Watch position
-if (navigator.geolocation) {
-  navigator.geolocation.watchPosition(
-    (pos) => {
-      const lat = pos.coords.latitude.toFixed(4);
-      const lon = pos.coords.longitude.toFixed(4);
-      const el = document.getElementById('geoCoords');
-      if (el) el.textContent = `LAT: ${lat} | LON: ${lon}`;
-    },
-    () => {},
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-// ===== TABS =====
-function switchTab(tabEl, contentId) {
-  const parent = tabEl.closest('.glass-card-body');
-  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  tabEl.classList.add('active');
-  document.getElementById(contentId).classList.add('active');
-}
-
-// ===== TOAST =====
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(100px)';
-    toast.style.transition = 'all 0.3s';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
-// ===== ARTICLES RNMC =====
-function renderArticles(filter = '') {
-  const container = document.getElementById('articlesList');
-  const filtered = articlesData.filter(a =>
-    filter === '' ||
-    a.title.toLowerCase().includes(filter.toLowerCase()) ||
-    a.desc.toLowerCase().includes(filter.toLowerCase()) ||
-    a.tags.some(t => t.text.toLowerCase().includes(filter.toLowerCase()))
-  );
-
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📚</div>
-        <div class="empty-title">No se encontraron artículos</div>
-        <div class="empty-desc">Intente con otro término de búsqueda</div>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = filtered.map(a => `
-    <div class="article-card" onclick="openArticleModal(${a.id})">
-      <div class="article-number">ARTÍCULO ${a.id} — LEY 1801 DE 2016</div>
-      <div class="article-title">${a.title}</div>
-      <div class="article-desc">${a.desc}</div>
-      <div class="article-tags">
-        ${a.tags.map(t => `<span class="tag ${t.type}">${t.text}</span>`).join('')}
-        ${a.mediation ? '<span class="mediation-badge" style="margin-left:auto">🤝 Mediable</span>' : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterArticles() {
-  const val = document.getElementById('rnmcSearch').value;
-  renderArticles(val);
-}
-
-function openArticleModal(id) {
-  const article = articlesData.find(a => a.id === id);
-  if (!article) return;
-
-  document.getElementById('modalArticleTitle').textContent = `Artículo ${article.id} — Ley 1801`;
-  document.getElementById('modalArticleBody').innerHTML = `
-    <h4 style="font-family:'Space Grotesk',sans-serif;color:var(--cyber-cyan);margin-bottom:12px">${article.title}</h4>
-    <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px">${article.desc}</p>
-
-    <h4 style="font-family:'Space Grotesk',sans-serif;color:var(--cyber-blue);margin:16px 0 8px">Numerales</h4>
-    ${article.numerals.map(n => `
-      <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;color:var(--text-secondary)">
-        <strong style="color:var(--cyber-cyan)">Numeral ${n.n}:</strong> ${n.text}
-      </div>
-    `).join('')}
-
-    <h4 style="font-family:'Space Grotesk',sans-serif;color:var(--cyber-yellow);margin:16px 0 8px">⚖️ Medida Correctiva</h4>
-    <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">${article.measure}</p>
-
-    <h4 style="font-family:'Space Grotesk',sans-serif;color:var(--cyber-green);margin:16px 0 8px">🎯 Procedimiento Táctico</h4>
-    <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;white-space:pre-line">${article.tactic}</p>
-
-    ${article.mediation ? '<div class="alert alert-info" style="margin-top:16px">🤝 Este artículo aplica para <strong>mediación policial</strong> según el Art. 217 de la Ley 1801.</div>' : ''}
-  `;
-
-  document.getElementById('articleModal').classList.add('active');
-  document.getElementById('articleModal').dataset.articleId = id;
-}
-
-function closeModal() {
-  document.getElementById('articleModal').classList.remove('active');
-}
-
-function usarArticuloRelato() {
-  const id = document.getElementById('articleModal').dataset.articleId;
-  closeModal();
-  navigateTo('relatos', document.querySelectorAll('.nav-item')[1]);
-  const select = document.getElementById('relatoArticulo');
-  for (let opt of select.options) {
-    if (opt.value === id) { opt.selected = true; break; }
-  }
-  showToast(`Artículo ${id} seleccionado para relato`, 'info');
-}
-
-// ===== GENERATE REPORT =====
-function generarRelato() {
-  const articulo = document.getElementById('relatoArticulo').value;
-  const numeral = document.getElementById('relatoNumeral').value;
-  const hora = document.getElementById('relatoHora').value;
-  const zona = document.getElementById('relatoZona').value;
-  const hechos = document.getElementById('relatoHechos').value;
-  const descargos = document.getElementById('relatoDescargos').value;
-  const medida = document.getElementById('relatoMedida').value;
-  const nombre = document.getElementById('relatoNombre').value || 'NO IDENTIFICADO';
-  const doc = document.getElementById('relatoDoc').value || 'N/A';
-
-  // Validate
-  if (!articulo || !hora || !zona || !hechos || !descargos) {
-    showToast('Complete los campos obligatorios (*)', 'error');
-    return;
-  }
-
-  // Show loading
-  const outputCard = document.getElementById('reportOutputCard');
-  const output = document.getElementById('reportOutput');
-  outputCard.style.display = 'block';
-  output.innerHTML = '<div class="cyber-spinner"></div><p style="text-align:center;color:var(--text-muted);margin-top:8px">Generando relato con IA...</p>';
-
-  // Simulate AI generation (replace with Gemini API call in production)
-  setTimeout(() => {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-CO');
-    const medidas = {
-      'amonestacion': 'AMONESTACIÓN',
-      'decomiso': 'DECOMISO DE BIENES MUEBLES',
-      'restauracion': 'RESTAURACIÓN DEL BIEN',
-      'trabajo_comunitario': 'TRABAJO COMUNITARIO',
-      'multa': 'MULTA GENERAL'
-    };
-
-    const relato = `═══════════════════════════════════════════
-  INFORME POLICIAL - LEY 1801 DE 2016
-  CÓDIGO NACIONAL DE SEGURIDAD Y CONVIVENCIA
-═══════════════════════════════════════════
-
-📅 FECHA: ${dateStr}
-🕐 HORA DEL HECHO: ${hora}
-📍 ZONA DE ATENCIÓN: ${zona}
-👮 OFICIAL: [Nombre del Oficial]
-🔢 PLACA: [Número de Placa]
-
-───────────────────────────────────────────
-📋 NARRACIÓN DE HECHOS
-───────────────────────────────────────────
-
-Siendo las ${hora}, en la Zona de Atención: ${zona}, el suscrito oficial de policía se encontraba en labores de patrullaje preventivo cuando se tuvo conocimiento de los siguientes hechos:
-
-${hechos}
-
-Lo anterior en desarrollo de las funciones constitucionales y legales conferidas a la Policía Nacional de Colombia.
-
-───────────────────────────────────────────
-👤 DATOS DEL CIUDADANO
-───────────────────────────────────────────
-
-• Nombre: ${nombre}
-• Documento: ${doc}
-• Comportamiento: Art. ${articulo}${numeral ? ' Numeral ' + numeral : ''} de la Ley 1801 de 2016
-
-───────────────────────────────────────────
-🗣️ DESCARGOS DEL CIUDADANO (ART. 222)
-───────────────────────────────────────────
-
-${descargos}
-
-───────────────────────────────────────────
-⚖️ MEDIDA CORRECTIVA APLICADA
-───────────────────────────────────────────
-
-Medida: ${medidas[medida] || 'POR DEFINIR'}
-
-Fundamento Legal: Artículo ${articulo} de la Ley 1801 de 2016, en concordancia con los artículos 223 y siguientes del Código Nacional de Seguridad y Convivencia Ciudadana.
-
-───────────────────────────────────────────
-📝 OBSERVACIONES
-───────────────────────────────────────────
-
-${document.getElementById('relatoObs').value || 'Sin observaciones adicionales.'}
-
-───────────────────────────────────────────
-
-Firma del Oficial: _________________________
-Nombre: _________________________________
-Placa: _________________________________
-
-Firma del Ciudadano: _____________________
-Nombre: ${nombre}
-Documento: ${doc}
-
-═══════════════════════════════════════════
-  Generado por AOP v2.0 — ${dateStr}
-═══════════════════════════════════════════`;
-
-    output.textContent = relato;
-    showToast('Relato generado exitosamente', 'success');
-
-    // Scroll to output
-    outputCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 2000);
-}
-
-function limpiarFormulario() {
-  document.querySelectorAll('#page-relatos .form-input, #page-relatos .form-textarea').forEach(el => el.value = '');
-  document.querySelectorAll('#page-relatos .form-select').forEach(el => el.selectedIndex = 0);
-  document.getElementById('reportOutputCard').style.display = 'none';
-  showToast('Formulario limpiado', 'info');
-}
-
-function copiarRelato() {
-  const text = document.getElementById('reportOutput').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Relato copiado al portapapeles', 'success');
-  }).catch(() => {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('Relato copiado', 'success');
-  });
-}
-
-function descargarRelato() {
-  const text = document.getElementById('reportOutput').textContent;
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `relato_policial_${Date.now()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Archivo descargado', 'success');
-}
-
-function guardarRelato() {
-  showToast('Borrador guardado localmente', 'success');
-}
-
-// ===== SCENARIO =====
-let simScore = 0;
-let scenariosCompleted = 0;
-
-function selectScenario(el, isCorrect) {
-  const options = el.parentElement.querySelectorAll('.scenario-option');
-  options.forEach(o => {
-    o.style.pointerEvents = 'none';
-    if (o === el) {
-      o.classList.add(isCorrect ? 'correct' : 'incorrect');
-    }
-  });
-
-  const feedback = document.getElementById('feedbackText');
-
-  if (isCorrect) {
-    simScore = Math.min(100, simScore + 25);
-    scenariosCompleted++;
-    feedback.innerHTML = `
-      <div class="alert alert-success">✅ ¡Respuesta Correcta!</div>
-      <p style="margin-top:12px;line-height:1.8">
-        <strong>Fundamento Legal:</strong> El procedimiento correcto es acercarse de manera profesional, identificarse, explicar la norma aplicable (Art. 35 de la Ley 1801), solicitar la reducción inmediata del ruido y documentar toda la intervención. Este comportamiento respeta el debido proceso, el principio de necesidad y proporcionalidad, y permite aplicar la mediación policial si el ciudadano accede a cooperar.<br><br>
-        <strong>Consejo Pedagógico:</strong> Siempre inicie la intervención con una actitud profesional y explique la norma antes de aplicar cualquier medida correctiva. La documentación es clave para su defensa jurídica.
-      </p>
-    `;
-    showToast('¡Excelente! +25 puntos', 'success');
-  } else {
-    feedback.innerHTML = `
-      <div class="alert alert-warning">⚠️ Respuesta Incorrecta</div>
-      <p style="margin-top:12px;line-height:1.8">
-        <strong>Análisis:</strong> Esta opción no cumple con los procedimientos establecidos en la Ley 1801 de 2016. Recuerde que toda intervención debe respetar el debido proceso, los derechos fundamentales y los principios de legalidad, necesidad y proporcionalidad.<br><br>
-        <strong>Consejo Pedagógico:</strong> Revise los artículos 2 y 217 de la Ley 1801 sobre los principios rectores y la mediación policial como mecanismo preferente.
-      </p>
-    `;
-    showToast('Respuesta incorrecta. Revise la retroalimentación.', 'error');
-  }
-
-  // Update score display
-  document.getElementById('simScore').textContent = simScore + '%';
-  document.getElementById('progressFill').style.width = (scenariosCompleted / 10 * 100) + '%';
-}
-
-// ===== CHECKLIST =====
-let checklistDone = 0;
-function toggleCheck(el) {
-  const checkbox = el.querySelector('.custom-checkbox');
-  const text = el.querySelector('.checklist-text');
-  const isChecked = checkbox.classList.toggle('checked');
-  text.classList.toggle('checked');
-  checklistDone = document.querySelectorAll('.custom-checkbox.checked').length;
-  document.getElementById('checklistCount').textContent = `${checklistDone} / 8`;
-
-  if (checklistDone === 8) {
-    showToast('✅ ¡Checklist completo! Todos los criterios de legalidad cumplidos.', 'success');
-  }
-}
-
-// ===== TIME VALIDATION =====
-document.getElementById('relatoHora')?.addEventListener('input', function(e) {
-  let val = e.target.value.replace(/[^0-9:]/g, '');
-  if (val.length === 2 && !val.includes(':')) val += ':';
-  if (val.length > 5) val = val.substring(0, 5);
-
-  // Validate military time
-  const parts = val.split(':');
-  if (parts[0] && parseInt(parts[0]) > 23) val = '23' + (parts[1] ? ':' + parts[1] : '');
-  if (parts[1] && parseInt(parts[1]) > 59) val = parts[0] + ':59';
-
-  e.target.value = val;
-});
-
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
-  renderArticles();
-  updateGeo();
-  showToast('Sistema AOP v2.0 cargado correctamente', 'success');
-});
-
-// Close modal on overlay click
-document.getElementById('articleModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Keyboard shortcut
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
-});
-</script>
-
+    <script>
+        // Reloj en tiempo real
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('es-ES', { hour12: false });
+            document.getElementById('liveTime').textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Interactividad simple para los botones
+        document.querySelectorAll('.dash-card, .btn-sim').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (!e.target.closest('button') && !e.target.closest('input')) {
+                    console.log('Navegación a módulo:', el.innerText.trim());
+                }
+            });
+        });
+
+        document.querySelector('.disconnect-btn').addEventListener('click', () => {
+            alert('Sesión finalizada. Modo demostración.');
+        });
+    </script>
 </body>
 </html>
-
