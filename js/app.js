@@ -1,6 +1,6 @@
 /**
- * APP OPERATIVO - Funcionalidades JavaScript
- * Sistema Táctico Policial
+ * PORTAL RNMC - Funcionalidades JavaScript
+ * Sistema Integrado Policía Nacional
  */
 
 // ===================================
@@ -62,32 +62,94 @@ function showNotification(message, type = 'info') {
 }
 
 // ===================================
-// Interactividad de Tarjetas del Dashboard
+// Tarjetas de Estadísticas del Dashboard
 // ===================================
-function initializeDashboardCards() {
-    const dashCards = document.querySelectorAll('.dash-card');
+function initializeStatCards() {
+    const statCards = document.querySelectorAll('.stat-card');
     
-    dashCards.forEach(card => {
+    statCards.forEach(card => {
         card.addEventListener('click', () => {
-            const moduleName = card.getAttribute('data-module');
-            const label = card.querySelector('.label');
-            const moduleText = label ? label.textContent.trim() : 'Módulo';
-            showNotification(`Abriendo ${moduleText}...`, 'info');
-            console.log('Navegación a módulo:', moduleName);
+            const action = card.getAttribute('data-action');
+            const label = card.querySelector('.stat-label');
+            const labelText = label ? label.textContent.trim() : 'Módulo';
+            
+            switch(action) {
+                case 'ver-casos':
+                    showNotification('Cargando casos activos...', 'info');
+                    break;
+                case 'ver-alertas':
+                    showNotification('Mostrando alertas pendientes...', 'warning');
+                    break;
+                case 'ver-unidades':
+                    showNotification('Listado de unidades disponibles', 'info');
+                    break;
+                case 'ver-reportes':
+                    showNotification('Abriendo reportes recientes...', 'info');
+                    break;
+                default:
+                    showNotification(`Accediendo a ${labelText}...`, 'info');
+            }
+            console.log('Acción dashboard:', action);
         });
     });
 }
 
 // ===================================
-// Botón de Simulador Táctico
+// Módulos de Consulta
 // ===================================
-function initializeSimButton() {
-    const simBtn = document.getElementById('btnSim');
+function initializeModuleButtons() {
+    const moduleBtns = document.querySelectorAll('.module-btn');
     
-    if (simBtn) {
-        simBtn.addEventListener('click', () => {
-            showNotification('Iniciando simulador táctico...', 'success');
-            console.log('Iniciando simulación táctica...');
+    moduleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const module = btn.getAttribute('data-module');
+            const span = btn.querySelector('span');
+            const moduleName = span ? span.textContent.trim() : 'Módulo';
+            
+            switch(module) {
+                case 'consultas':
+                    showNotification('Abriendo consultas generales...', 'info');
+                    break;
+                case 'antecedentes':
+                    showNotification('Cargando sistema de antecedentes...', 'info');
+                    break;
+                case 'vehiculos':
+                    showNotification('Accediendo a consulta de vehículos...', 'info');
+                    break;
+                case 'personas':
+                    showNotification('Abriendo módulo de personas...', 'info');
+                    break;
+                default:
+                    showNotification(`Iniciando ${moduleName}...`, 'info');
+            }
+            console.log('Módulo seleccionado:', module);
+        });
+    });
+}
+
+// ===================================
+// Botón de Búsqueda
+// ===================================
+function initializeSearchButton() {
+    const btnSearch = document.getElementById('btnSearch');
+    const searchInput = document.getElementById('searchInput');
+    
+    if (btnSearch && searchInput) {
+        btnSearch.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                showNotification(`Buscando: ${query}`, 'info');
+                console.log('Búsqueda:', query);
+                searchInput.value = '';
+            } else {
+                showNotification('Ingrese un término para buscar', 'error');
+            }
+        });
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                btnSearch.click();
+            }
         });
     }
 }
@@ -100,59 +162,104 @@ function initializeDisconnectButton() {
     
     if (disconnectBtn) {
         disconnectBtn.addEventListener('click', () => {
-            showNotification('Sesión finalizada. Modo demostración.', 'error');
-            console.log('Cierre de sesión');
+            showNotification('Sesión finalizada. ¡Hasta pronto!', 'error');
+            console.log('Cierre de sesión solicitado');
         });
     }
 }
 
 // ===================================
-// Búsqueda
+// Simulador Táctico - Botón Iniciar
 // ===================================
-function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
+function initializeSimulatorStart() {
+    const btnStartSim = document.getElementById('btnStartSim');
+    const simStatus = document.getElementById('simStatus');
     
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = searchInput.value.trim();
-                if (query) {
-                    showNotification(`Buscando: ${query}`, 'info');
-                    console.log('Búsqueda:', query);
-                    searchInput.value = '';
-                }
+    if (btnStartSim && simStatus) {
+        btnStartSim.addEventListener('click', () => {
+            simStatus.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#f59e0b;"></i> INICIANDO ESCENARIO...';
+            showNotification('Iniciando simulador táctico...', 'success');
+            console.log('Iniciando simulación táctica...');
+            
+            setTimeout(() => {
+                simStatus.innerHTML = '<i class="fas fa-circle" style="color:#10b981; font-size:0.5rem;"></i> SIMULACIÓN EN CURSO';
+                showNotification('Escenario activo - Buen entrenamiento', 'success');
+            }, 2000);
+        });
+    }
+}
+
+// ===================================
+// Simulador Táctico - Botón Reiniciar
+// ===================================
+function initializeSimulatorReset() {
+    const btnResetSim = document.getElementById('btnResetSim');
+    const simStatus = document.getElementById('simStatus');
+    
+    if (btnResetSim && simStatus) {
+        btnResetSim.addEventListener('click', () => {
+            simStatus.innerHTML = '<i class="fas fa-circle" style="color:#10b981; font-size:0.5rem;"></i> LISTO PARA INICIAR';
+            showNotification('Simulador reiniciado', 'info');
+            console.log('Reiniciando simulador...');
+        });
+    }
+}
+
+// ===================================
+// Toggles de Configuración
+// ===================================
+function initializeSettingsToggles() {
+    const toggleNotif = document.getElementById('toggleNotif');
+    const toggleSound = document.getElementById('toggleSound');
+    
+    if (toggleNotif) {
+        toggleNotif.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                showNotification('Notificaciones activadas', 'success');
+            } else {
+                showNotification('Notificaciones desactivadas', 'info');
+            }
+        });
+    }
+    
+    if (toggleSound) {
+        toggleSound.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                showNotification('Sonido activado', 'success');
+            } else {
+                showNotification('Sonido desactivado', 'info');
             }
         });
     }
 }
 
 // ===================================
-// Módulos MIT
+// Enlace al RNMC Oficial
 // ===================================
-function initializeMITModules() {
-    const mitCards = document.querySelectorAll('.mit-card');
+function initializeRNMCConnection() {
+    const connectLink = document.querySelector('.btn-connect-official');
     
-    mitCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const mitCode = card.getAttribute('data-mit');
-            const desc = card.querySelector('.mit-desc');
-            const descText = desc ? desc.textContent : '';
-            showNotification(`Accediendo a ${mitCode}: ${descText}`, 'info');
-            console.log('Módulo MIT:', mitCode);
+    if (connectLink) {
+        connectLink.addEventListener('click', () => {
+            showNotification('Abriendo portal RNMC oficial...', 'info');
+            console.log('Redirigiendo a rnmc2web.policia.gov.co');
         });
-    });
+    }
 }
 
 // ===================================
 // Inicialización General
 // ===================================
 document.addEventListener('DOMContentLoaded', () => {
-    initializeDashboardCards();
-    initializeSimButton();
+    initializeStatCards();
+    initializeModuleButtons();
+    initializeSearchButton();
     initializeDisconnectButton();
-    initializeSearch();
-    initializeMITModules();
+    initializeSimulatorStart();
+    initializeSimulatorReset();
+    initializeSettingsToggles();
+    initializeRNMCConnection();
     
-    showNotification('Sistema inicializado correctamente', 'success');
-    console.log('APP OPERATIVO - Sistema inicializado correctamente');
+    showNotification('Portal RNMC inicializado correctamente', 'success');
+    console.log('PORTAL RNMC - Sistema inicializado correctamente');
 });
