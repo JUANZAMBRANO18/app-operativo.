@@ -3,197 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP OPERATIVO | Sistema Táctico Policial</title>
+    <title>Portal RNMC - Policía Nacional</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#334155">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <div class="app-header">
-            <div class="app-title">
-                <h1>APP OPERATIVO</h1>
-                <span>APLICACIÓN MÁQUINARIA</span>
+    <!-- Notificaciones Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Encabezado -->
+    <header class="main-header">
+        <div class="header-left">
+            <div class="logo-area">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <h1>PORTAL RNMC</h1>
             </div>
-            <div class="user-area">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="BUSQUEDA...">
-                </div>
-                <div class="user-profile">
-                    <i class="fas fa-user-shield"></i>
-                    <div class="user-info">
-                        <span class="user-name">JUAN TOSTADO</span>
-                        <button class="disconnect-btn">DESCONECTAR</button>
-                    </div>
-                </div>
+            <div class="clock-display">
+                <span id="time">00:00:00</span>
+                <span id="date">--/--/--</span>
             </div>
         </div>
-
-        <!-- Dashboard Cards -->
-        <div class="dashboard-grid">
-            <div class="dash-card">
-                <i class="fas fa-chart-pie"></i>
-                <span class="label">GENERALIZACIÓN DE RECURSOS</span>
-            </div>
-            <div class="dash-card">
-                <i class="fas fa-map-marked-alt"></i>
-                <span class="label">PORTAL RNMC</span>
-            </div>
-            <div class="dash-card">
-                <i class="fas fa-gamepad"></i>
-                <span class="label">SIMULADOR TÁCTICO</span>
-            </div>
-            <div class="dash-card">
-                <i class="fas fa-gavel"></i>
-                <span class="label">DEFENSAS JURÍDICAS</span>
-            </div>
-            <div class="dash-card">
-                <i class="fas fa-folder-open"></i>
-                <span class="label">ARCHIVO DE COMPARENDOS</span>
-            </div>
-            <div class="dash-card">
-                <i class="fas fa-file-alt"></i>
-                <span class="label">RESUMEN DIA</span>
-            </div>
+        <div class="header-right">
+            <button class="btn-official" onclick="app.goToOfficial()">
+                <i class="fa-solid fa-lock"></i> Sistema Oficial
+            </button>
+            <button class="btn-logout" onclick="app.logout()">
+                <i class="fa-solid fa-power-off"></i> Salir
+            </button>
         </div>
+    </header>
 
-        <!-- Main Content -->
-        <div class="main-layout">
-            <div class="left-content">
-                <div class="system-header">
-                    <div class="system-badge">
-                        <i class="fas fa-shield-alt"></i> SISTEMA ACTIVO
-                    </div>
-                    <div class="tags">
-                        <span class="tag">EN ARTE</span>
-                        <span class="tag">CLIMAX</span>
-                        <span class="tag">SECTOR</span>
-                        <span class="tag">CURRENTS</span>
+    <div class="container">
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            
+            <!-- Buscador -->
+            <section class="search-section">
+                <div class="input-group">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="global-search" placeholder="Buscar por placa, nombre o documento...">
+                    <button onclick="app.executeSearch()"><i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </section>
+
+            <!-- Estadísticas -->
+            <section class="stats-grid">
+                <div class="stat-card" onclick="app.showStat('Casos Activos')">
+                    <div class="icon-box blue"><i class="fa-solid fa-folder-open"></i></div>
+                    <div class="stat-info">
+                        <h3>Casos Activos</h3>
+                        <p id="count-cases">12</p>
                     </div>
                 </div>
-
-                <div class="directive-panel">
-                    <div class="directive-title">
-                        <i class="fas fa-scroll"></i> GENERAL RELATO
-                        <span style="font-size:0.9rem; margin-left:auto; opacity:0.7;">PROYECTO LEGAL CON LA</span>
-                    </div>
-                    <div style="font-weight:600; margin-bottom:12px; color:#00c6ff;">
-                        <i class="fas fa-gavel"></i> DIRECTIVA 3ª PROCEDIMIENTO
-                    </div>
-                    
-                    <div class="protocol-text">
-                        <p><strong>PROTOCOLO 2020-21:</strong> Unión de 32 países en la lucha contra la corrupción y el mal uso de recursos humanos.</p>
-                    </div>
-
-                    <div class="system-specs">
-                        <div class="spec-item">
-                            <i class="fas fa-database"></i>
-                            <span>SISTEMA: Q-Cert® integrado</span>
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Base de datos institucional</span>
-                        </div>
-                    </div>
-
-                    <div class="alert-box">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div class="alert-text">
-                            <strong>ALERTE:</strong> Se detecta un incremento del 10% en los resultados por encima de la factura de derechos en el futuro 6.
-                        </div>
+                <div class="stat-card" onclick="app.showStat('Alertas')">
+                    <div class="icon-box red"><i class="fa-solid fa-bell"></i></div>
+                    <div class="stat-info">
+                        <h3>Alertas</h3>
+                        <p id="count-alerts">5</p>
                     </div>
                 </div>
+                <div class="stat-card" onclick="app.showStat('Unidades')">
+                    <div class="icon-box green"><i class="fa-solid fa-car-side"></i></div>
+                    <div class="stat-info">
+                        <h3>Unidades</h3>
+                        <p id="count-units">8</p>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="app.showStat('Reportes')">
+                    <div class="icon-box gray"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="stat-info">
+                        <h3>Reportes</h3>
+                        <p id="count-reports">24</p>
+                    </div>
+                </div>
+            </section>
 
-                <!-- MIT Modules -->
-                <div class="mit-modules">
-                    <div class="mit-card">
-                        <div class="mit-code">MIT_1B</div>
-                        <div class="mit-desc">PROYECTO DE PERSONAS</div>
+            <!-- Módulos -->
+            <section class="modules-section">
+                <h2 class="section-title"><i class="fa-solid fa-database"></i> Módulos de Consulta</h2>
+                <div class="modules-grid">
+                    <div class="module-card" onclick="app.openModule('Consultas Generales')">
+                        <i class="fa-solid fa-laptop-medical module-icon"></i>
+                        <span>Consultas Generales</span>
                     </div>
-                    <div class="mit-card">
-                        <div class="mit-code">MIT_2B</div>
-                        <div class="mit-desc">PROYECTO DE VEHÍCULOS</div>
+                    <div class="module-card" onclick="app.openModule('Antecedentes')">
+                        <i class="fa-solid fa-user-shield module-icon"></i>
+                        <span>Antecedentes</span>
                     </div>
-                    <div class="mit-card">
-                        <div class="mit-code">MIT_3B</div>
-                        <div class="mit-desc">PROYECTO DE ESTADÍSTICAS</div>
+                    <div class="module-card" onclick="app.openModule('Vehículos')">
+                        <i class="fa-solid fa-car module-icon"></i>
+                        <span>Vehículos</span>
                     </div>
-                    <div class="mit-card">
-                        <div class="mit-code">MIT_4B</div>
-                        <div class="mit-desc">PROYECTO DE BOMBAS MUNICIPALES</div>
+                    <div class="module-card" onclick="app.openModule('Personas')">
+                        <i class="fa-solid fa-users module-icon"></i>
+                        <span>Personas</span>
                     </div>
+                </div>
+            </section>
+
+            <!-- Simulador -->
+            <section class="simulator-section">
+                <h2 class="section-title"><i class="fa-solid fa-chess-board"></i> Simulador Táctico</h2>
+                <div class="simulator-box">
+                    <div id="sim-status" class="sim-status idle">
+                        <i class="fa-solid fa-circle-pause"></i>
+                        <span>ESPERANDO INICIO</span>
+                    </div>
+                    <div class="sim-controls">
+                        <button id="btn-sim-start" class="btn-primary" onclick="app.toggleSimulator()">
+                            <i class="fa-solid fa-play"></i> Iniciar Escenario
+                        </button>
+                        <button class="btn-secondary" onclick="app.resetSimulator()">
+                            <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Panel Lateral -->
+        <aside class="sidebar">
+            <div class="panel-card">
+                <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
+                
+                <div class="setting-item">
+                    <label>Notificaciones Push</label>
+                    <label class="switch">
+                        <input type="checkbox" checked onchange="app.toggleSetting('Notificaciones', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>Sonidos de Alerta</label>
+                    <label class="switch">
+                        <input type="checkbox" checked onchange="app.toggleSetting('Sonidos', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>Modo Oscuro</label>
+                    <label class="switch">
+                        <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>Nota:</strong> Para acceder a la base de datos real RNMC, utilice el botón "Sistema Oficial". Esta plataforma es un panel de control rápido.</p>
                 </div>
             </div>
-
-            <!-- Right Panel -->
-            <div class="right-panel">
-                <div class="time-location-card">
-                    <div class="time-display" id="liveTime">21:21:37</div>
-                    <div class="date-display">08:00h, 04/03/2025</div>
-                    <div class="coordinates">
-                        <div><i class="fas fa-map-pin"></i> DIRECCIONES / ZONA</div>
-                        <div class="coord">4.300000, -74.150000</div>
-                    </div>
-                    <div class="attention-badge">
-                        <i class="fas fa-bullseye"></i> 100M DE ATENCION
-                    </div>
-                </div>
-
-                <div class="tactical-sim-card">
-                    <h3><i class="fas fa-crosshairs"></i> ENTREGA/MENUTO</h3>
-                    <div class="sim-preview">
-                        <i class="fas fa-play-circle" style="font-size:2rem; opacity:0.5;"></i> SIMULADOR TACTICO
-                    </div>
-                    <button class="btn-sim"><i class="fas fa-play"></i> INICIAR SIMULACIÓN</button>
-                </div>
-
-                <div class="juridical-ref">
-                    <i class="fas fa-shield-virus"></i>
-                    <div style="font-weight:600;">REFERENCIA PROTECCIÓN JURÍDICA</div>
-                    <div style="font-size:0.8rem; opacity:0.8;">REFERENCIA PROTECCIÓN</div>
-                </div>
-
-                <div class="records-counter">
-                    <div style="font-size:0.9rem; color:#b0d0ff;">REGISTROS RECIBIDOS</div>
-                    <div class="records-number">214</div>
-                    <div style="margin-top:5px;">PRESENTES</div>
-                </div>
-
-                <div style="font-size:0.8rem; color:#8ab0d0; text-align:right;">
-                    FACILITADOS DE REGISTRO (LET Nº01)
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="app-footer">
-            <div class="footer-left">
-                <span>CREARSE POR 2018 ZARRABAN</span>
-                <span class="version">APP OPERATIVO Y4.2.0</span>
-            </div>
-            <div class="footer-right">
-                <span class="protocol-badge"><i class="fas fa-certificate"></i> PROTOCOLUS LEY 10651</span>
-                <span>2024 © TODOS LOS DERECHOS RESERVADOS</span>
-            </div>
-        </div>
+        </aside>
     </div>
 
     <script src="js/app.js"></script>
-    <script>
-        // Registrar Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('js/sw.js')
-                    .then(reg => console.log('Service Worker registrado:', reg))
-                    .catch(err => console.error('Error al registrar SW:', err));
-            });
-        }
-    </script>
 </body>
 </html>
