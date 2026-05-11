@@ -212,3 +212,29 @@ const app = {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
 });
+
+// Registrar Service Worker para PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('ServiceWorker registrado:', registration.scope);
+            })
+            .catch(error => {
+                console.log('Error al registrar ServiceWorker:', error);
+            });
+    });
+}
+
+// Manejar instalación de PWA
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('PWA lista para instalar');
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('PWA instalada exitosamente');
+    deferredPrompt = null;
+});
