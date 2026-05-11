@@ -16,7 +16,7 @@ function updateClock() {
         year: 'numeric' 
     });
     const liveTimeElement = document.getElementById('liveTime');
-    const dateDisplayElement = document.querySelector('.date-display');
+    const dateDisplayElement = document.getElementById('liveDate');
     
     if (liveTimeElement) {
         liveTimeElement.textContent = timeStr;
@@ -34,8 +34,10 @@ updateClock();
 // Notificaciones Toast
 // ===================================
 function showNotification(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    
     // Eliminar notificaciones anteriores
-    const existingToast = document.querySelector('.toast-notification');
+    const existingToast = toastContainer.querySelector('.toast-notification');
     if (existingToast) {
         existingToast.remove();
     }
@@ -47,7 +49,7 @@ function showNotification(message, type = 'info') {
         <span>${message}</span>
     `;
     
-    document.body.appendChild(toast);
+    toastContainer.appendChild(toast);
     
     setTimeout(() => {
         toast.classList.add('show');
@@ -67,9 +69,10 @@ function initializeDashboardCards() {
     
     dashCards.forEach(card => {
         card.addEventListener('click', () => {
+            const moduleName = card.getAttribute('data-module');
             const label = card.querySelector('.label');
-            const moduleName = label ? label.textContent.trim() : 'Módulo';
-            showNotification(`Abriendo ${moduleName}...`, 'info');
+            const moduleText = label ? label.textContent.trim() : 'Módulo';
+            showNotification(`Abriendo ${moduleText}...`, 'info');
             console.log('Navegación a módulo:', moduleName);
         });
     });
@@ -79,7 +82,7 @@ function initializeDashboardCards() {
 // Botón de Simulador Táctico
 // ===================================
 function initializeSimButton() {
-    const simBtn = document.querySelector('.btn-sim');
+    const simBtn = document.getElementById('btnSim');
     
     if (simBtn) {
         simBtn.addEventListener('click', () => {
@@ -93,7 +96,7 @@ function initializeSimButton() {
 // Botón de Desconexión
 // ===================================
 function initializeDisconnectButton() {
-    const disconnectBtn = document.querySelector('.disconnect-btn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
     
     if (disconnectBtn) {
         disconnectBtn.addEventListener('click', () => {
@@ -107,7 +110,7 @@ function initializeDisconnectButton() {
 // Búsqueda
 // ===================================
 function initializeSearch() {
-    const searchInput = document.querySelector('.search-box input');
+    const searchInput = document.getElementById('searchInput');
     
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
@@ -116,6 +119,7 @@ function initializeSearch() {
                 if (query) {
                     showNotification(`Buscando: ${query}`, 'info');
                     console.log('Búsqueda:', query);
+                    searchInput.value = '';
                 }
             }
         });
@@ -130,10 +134,11 @@ function initializeMITModules() {
     
     mitCards.forEach(card => {
         card.addEventListener('click', () => {
-            const code = card.querySelector('.mit-code');
+            const mitCode = card.getAttribute('data-mit');
             const desc = card.querySelector('.mit-desc');
-            const moduleName = code ? code.textContent : 'Módulo';
-            showNotification(`Accediendo a ${moduleName}: ${desc ? desc.textContent : ''}`, 'info');
+            const descText = desc ? desc.textContent : '';
+            showNotification(`Accediendo a ${mitCode}: ${descText}`, 'info');
+            console.log('Módulo MIT:', mitCode);
         });
     });
 }

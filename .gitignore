@@ -1,3 +1,4 @@
+```
 # Compiled and build artifacts
 *.pyc
 __pycache__/
@@ -6,6 +7,12 @@ __pycache__/
 dist/
 build/
 target/
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 .venv/
@@ -63,3 +70,4 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```

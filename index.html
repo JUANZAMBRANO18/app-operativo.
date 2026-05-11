@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APP OPERATIVO | Sistema Táctico Policial</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#4b5563">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 <body>
     <div class="app-container">
         <!-- Header -->
-        <div class="app-header">
+        <header class="app-header">
             <div class="app-title">
                 <h1>APP OPERATIVO</h1>
                 <span>APLICACIÓN MÁQUINARIA</span>
@@ -23,48 +23,48 @@
             <div class="user-area">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="BUSQUEDA...">
+                    <input type="text" id="searchInput" placeholder="BUSQUEDA...">
                 </div>
                 <div class="user-profile">
                     <i class="fas fa-user-shield"></i>
                     <div class="user-info">
                         <span class="user-name">JUAN TOSTADO</span>
-                        <button class="disconnect-btn">DESCONECTAR</button>
+                        <button class="disconnect-btn" id="disconnectBtn">DESCONECTAR</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
         <!-- Dashboard Cards -->
-        <div class="dashboard-grid">
-            <div class="dash-card">
+        <nav class="dashboard-grid" role="navigation">
+            <button class="dash-card" data-module="recursos">
                 <i class="fas fa-chart-pie"></i>
                 <span class="label">GENERALIZACIÓN DE RECURSOS</span>
-            </div>
-            <div class="dash-card">
+            </button>
+            <button class="dash-card" data-module="rnmc">
                 <i class="fas fa-map-marked-alt"></i>
                 <span class="label">PORTAL RNMC</span>
-            </div>
-            <div class="dash-card">
+            </button>
+            <button class="dash-card" data-module="simulador">
                 <i class="fas fa-gamepad"></i>
                 <span class="label">SIMULADOR TÁCTICO</span>
-            </div>
-            <div class="dash-card">
+            </button>
+            <button class="dash-card" data-module="defensas">
                 <i class="fas fa-gavel"></i>
                 <span class="label">DEFENSAS JURÍDICAS</span>
-            </div>
-            <div class="dash-card">
+            </button>
+            <button class="dash-card" data-module="comparendos">
                 <i class="fas fa-folder-open"></i>
                 <span class="label">ARCHIVO DE COMPARENDOS</span>
-            </div>
-            <div class="dash-card">
+            </button>
+            <button class="dash-card" data-module="resumen">
                 <i class="fas fa-file-alt"></i>
                 <span class="label">RESUMEN DIA</span>
-            </div>
-        </div>
+            </button>
+        </nav>
 
         <!-- Main Content -->
-        <div class="main-layout">
+        <main class="main-layout">
             <div class="left-content">
                 <div class="system-header">
                     <div class="system-badge">
@@ -78,12 +78,12 @@
                     </div>
                 </div>
 
-                <div class="directive-panel">
+                <section class="directive-panel">
                     <div class="directive-title">
                         <i class="fas fa-scroll"></i> GENERAL RELATO
                         <span style="font-size:0.9rem; margin-left:auto; opacity:0.7;">PROYECTO LEGAL CON LA</span>
                     </div>
-                    <div style="font-weight:600; margin-bottom:12px; color:#00c6ff;">
+                    <div style="font-weight:600; margin-bottom:12px; color:#6b7280;">
                         <i class="fas fa-gavel"></i> DIRECTIVA 3ª PROCEDIMIENTO
                     </div>
                     
@@ -108,34 +108,34 @@
                             <strong>ALERTE:</strong> Se detecta un incremento del 10% en los resultados por encima de la factura de derechos en el futuro 6.
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- MIT Modules -->
-                <div class="mit-modules">
-                    <div class="mit-card">
+                <section class="mit-modules">
+                    <button class="mit-card" data-mit="MIT_1B">
                         <div class="mit-code">MIT_1B</div>
                         <div class="mit-desc">PROYECTO DE PERSONAS</div>
-                    </div>
-                    <div class="mit-card">
+                    </button>
+                    <button class="mit-card" data-mit="MIT_2B">
                         <div class="mit-code">MIT_2B</div>
                         <div class="mit-desc">PROYECTO DE VEHÍCULOS</div>
-                    </div>
-                    <div class="mit-card">
+                    </button>
+                    <button class="mit-card" data-mit="MIT_3B">
                         <div class="mit-code">MIT_3B</div>
                         <div class="mit-desc">PROYECTO DE ESTADÍSTICAS</div>
-                    </div>
-                    <div class="mit-card">
+                    </button>
+                    <button class="mit-card" data-mit="MIT_4B">
                         <div class="mit-code">MIT_4B</div>
                         <div class="mit-desc">PROYECTO DE BOMBAS MUNICIPALES</div>
-                    </div>
-                </div>
+                    </button>
+                </section>
             </div>
 
             <!-- Right Panel -->
-            <div class="right-panel">
+            <aside class="right-panel">
                 <div class="time-location-card">
                     <div class="time-display" id="liveTime">21:21:37</div>
-                    <div class="date-display">08:00h, 04/03/2025</div>
+                    <div class="date-display" id="liveDate">08:00h, 04/03/2025</div>
                     <div class="coordinates">
                         <div><i class="fas fa-map-pin"></i> DIRECCIONES / ZONA</div>
                         <div class="coord">4.300000, -74.150000</div>
@@ -150,7 +150,7 @@
                     <div class="sim-preview">
                         <i class="fas fa-play-circle" style="font-size:2rem; opacity:0.5;"></i> SIMULADOR TACTICO
                     </div>
-                    <button class="btn-sim"><i class="fas fa-play"></i> INICIAR SIMULACIÓN</button>
+                    <button class="btn-sim" id="btnSim"><i class="fas fa-play"></i> INICIAR SIMULACIÓN</button>
                 </div>
 
                 <div class="juridical-ref">
@@ -160,19 +160,19 @@
                 </div>
 
                 <div class="records-counter">
-                    <div style="font-size:0.9rem; color:#b0d0ff;">REGISTROS RECIBIDOS</div>
+                    <div style="font-size:0.9rem; color:#86efac;">REGISTROS RECIBIDOS</div>
                     <div class="records-number">214</div>
                     <div style="margin-top:5px;">PRESENTES</div>
                 </div>
 
-                <div style="font-size:0.8rem; color:#8ab0d0; text-align:right;">
+                <div style="font-size:0.8rem; color:#6b7280; text-align:right;">
                     FACILITADOS DE REGISTRO (LET Nº01)
                 </div>
-            </div>
-        </div>
+            </aside>
+        </main>
 
         <!-- Footer -->
-        <div class="app-footer">
+        <footer class="app-footer">
             <div class="footer-left">
                 <span>CREARSE POR 2018 ZARRABAN</span>
                 <span class="version">APP OPERATIVO Y4.2.0</span>
@@ -181,8 +181,11 @@
                 <span class="protocol-badge"><i class="fas fa-certificate"></i> PROTOCOLUS LEY 10651</span>
                 <span>2024 © TODOS LOS DERECHOS RESERVADOS</span>
             </div>
-        </div>
+        </footer>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
 
     <script src="js/app.js"></script>
     <script>
