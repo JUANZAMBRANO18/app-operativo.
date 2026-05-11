@@ -4,196 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal RNMC - Policía Nacional</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e293b">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="app-title">
-                <i class="fas fa-shield-alt" style="color: #60a5fa; font-size: 1.8rem;"></i>
-                <div>
-                    <h1>PORTAL RNMC</h1>
-                    <span>SISTEMA INTEGRADO POLICÍA NACIONAL</span>
-                </div>
+    <!-- Notificaciones Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Encabezado -->
+    <header class="main-header">
+        <div class="header-left">
+            <div class="logo-area">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <h1>PORTAL RNMC</h1>
             </div>
-            <div class="user-area">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar placa, nombre o caso...">
-                    <button id="btnSearch" style="background:none; border:none; cursor:pointer;"><i class="fas fa-arrow-right"></i></button>
-                </div>
-                <div class="user-profile">
-                    <i class="fas fa-user-shield"></i>
-                    <div class="user-info">
-                        <span class="user-name">OFICIAL EN SERVICIO</span>
-                        <button class="disconnect-btn" id="disconnectBtn">CERRAR SESIÓN</button>
-                    </div>
-                </div>
+            <div class="clock-display">
+                <span id="time">00:00:00</span>
+                <span id="date">--/--/--</span>
             </div>
-        </header>
+        </div>
+        <div class="header-right">
+            <button class="btn-official" onclick="app.goToOfficial()">
+                <i class="fa-solid fa-lock"></i> Sistema Oficial
+            </button>
+            <button class="btn-logout" onclick="app.logout()">
+                <i class="fa-solid fa-power-off"></i> Salir
+            </button>
+        </div>
+    </header>
 
-        <!-- Main Layout -->
-        <main class="main-layout">
-            <!-- Left Content -->
-            <div class="left-content">
-                <!-- Connection Box -->
-                <section class="connection-panel card">
-                    <div class="panel-header">
-                        <i class="fas fa-link"></i> ACCESO AL SISTEMA RNMC
-                    </div>
-                    <p class="panel-desc">Conéctese directamente a la plataforma oficial de la Policía Nacional</p>
-                    <a href="https://rnmc2web.policia.gov.co:4443/Login" target="_blank" class="btn-connect-official">
-                        <i class="fas fa-external-link-alt"></i> INGRESAR A RNMC OFICIAL
-                    </a>
-                    <p class="small-note"><i class="fas fa-info-circle"></i> Requiere red institucional o VPN activa</p>
-                </section>
+    <div class="container">
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            
+            <!-- Buscador -->
+            <section class="search-section">
+                <div class="input-group">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="global-search" placeholder="Buscar por placa, nombre o documento...">
+                    <button onclick="app.executeSearch()"><i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </section>
 
-                <!-- Dashboard Quick Stats -->
-                <section class="stats-grid">
-                    <div class="stat-card" data-action="ver-casos">
-                        <i class="fas fa-folder-open"></i>
-                        <div class="stat-number">12</div>
-                        <div class="stat-label">CASOS ACTIVOS</div>
-                    </div>
-                    <div class="stat-card warning" data-action="ver-alertas">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div class="stat-number">5</div>
-                        <div class="stat-label">ALERTAS</div>
-                    </div>
-                    <div class="stat-card" data-action="ver-unidades">
-                        <i class="fas fa-users"></i>
-                        <div class="stat-number">8</div>
-                        <div class="stat-label">UNIDADES</div>
-                    </div>
-                    <div class="stat-card" data-action="ver-reportes">
-                        <i class="fas fa-file-alt"></i>
-                        <div class="stat-number">24</div>
-                        <div class="stat-label">REPORTES</div>
-                    </div>
-                </section>
-
-                <!-- MIT Modules -->
-                <section class="mit-modules">
-                    <div class="section-header">
-                        <i class="fas fa-th-large"></i> MÓDULOS DE CONSULTA
-                    </div>
-                    <div class="modules-grid">
-                        <button class="module-btn" data-module="consultas">
-                            <i class="fas fa-search"></i>
-                            <span>CONSULTAS GENERALES</span>
-                        </button>
-                        <button class="module-btn" data-module="antecedentes">
-                            <i class="fas fa-archive"></i>
-                            <span>ANTECEDENTES</span>
-                        </button>
-                        <button class="module-btn" data-module="vehiculos">
-                            <i class="fas fa-car"></i>
-                            <span>VEHÍCULOS</span>
-                        </button>
-                        <button class="module-btn" data-module="personas">
-                            <i class="fas fa-user"></i>
-                            <span>PERSONAS</span>
-                        </button>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Right Panel -->
-            <aside class="right-panel">
-                <!-- Time & Location -->
-                <div class="time-location-card card">
-                    <div class="time-display" id="liveTime">00:00:00</div>
-                    <div class="date-display" id="liveDate">--/--/----</div>
-                    <div class="coordinates">
-                        <i class="fas fa-map-marker-alt"></i> UBICACIÓN ACTUAL
-                        <div class="coord-text">BOGOTÁ D.C. - COLOMBIA</div>
+            <!-- Estadísticas -->
+            <section class="stats-grid">
+                <div class="stat-card" onclick="app.showStat('Casos Activos')">
+                    <div class="icon-box blue"><i class="fa-solid fa-folder-open"></i></div>
+                    <div class="stat-info">
+                        <h3>Casos Activos</h3>
+                        <p id="count-cases">12</p>
                     </div>
                 </div>
-
-                <!-- Tactical Simulator -->
-                <div class="tactical-sim-card card">
-                    <div class="sim-header">
-                        <i class="fas fa-crosshairs"></i> SIMULADOR TÁCTICO
+                <div class="stat-card" onclick="app.showStat('Alertas')">
+                    <div class="icon-box red"><i class="fa-solid fa-bell"></i></div>
+                    <div class="stat-info">
+                        <h3>Alertas</h3>
+                        <p id="count-alerts">5</p>
                     </div>
-                    <div class="sim-status" id="simStatus">
-                        <i class="fas fa-circle" style="color:#10b981; font-size:0.5rem;"></i> LISTO PARA INICIAR
+                </div>
+                <div class="stat-card" onclick="app.showStat('Unidades')">
+                    <div class="icon-box green"><i class="fa-solid fa-car-side"></i></div>
+                    <div class="stat-info">
+                        <h3>Unidades</h3>
+                        <p id="count-units">8</p>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="app.showStat('Reportes')">
+                    <div class="icon-box gray"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="stat-info">
+                        <h3>Reportes</h3>
+                        <p id="count-reports">24</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Módulos -->
+            <section class="modules-section">
+                <h2 class="section-title"><i class="fa-solid fa-database"></i> Módulos de Consulta</h2>
+                <div class="modules-grid">
+                    <div class="module-card" onclick="app.openModule('Consultas Generales')">
+                        <i class="fa-solid fa-laptop-medical module-icon"></i>
+                        <span>Consultas Generales</span>
+                    </div>
+                    <div class="module-card" onclick="app.openModule('Antecedentes')">
+                        <i class="fa-solid fa-user-shield module-icon"></i>
+                        <span>Antecedentes</span>
+                    </div>
+                    <div class="module-card" onclick="app.openModule('Vehículos')">
+                        <i class="fa-solid fa-car module-icon"></i>
+                        <span>Vehículos</span>
+                    </div>
+                    <div class="module-card" onclick="app.openModule('Personas')">
+                        <i class="fa-solid fa-users module-icon"></i>
+                        <span>Personas</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Simulador -->
+            <section class="simulator-section">
+                <h2 class="section-title"><i class="fa-solid fa-chess-board"></i> Simulador Táctico</h2>
+                <div class="simulator-box">
+                    <div id="sim-status" class="sim-status idle">
+                        <i class="fa-solid fa-circle-pause"></i>
+                        <span>ESPERANDO INICIO</span>
                     </div>
                     <div class="sim-controls">
-                        <button class="btn-sim-primary" id="btnStartSim">
-                            <i class="fas fa-play"></i> INICIAR ESCENARIO
+                        <button id="btn-sim-start" class="btn-primary" onclick="app.toggleSimulator()">
+                            <i class="fa-solid fa-play"></i> Iniciar Escenario
                         </button>
-                        <button class="btn-sim-secondary" id="btnResetSim">
-                            <i class="fas fa-redo"></i> REINICIAR
+                        <button class="btn-secondary" onclick="app.resetSimulator()">
+                            <i class="fa-solid fa-rotate-right"></i> Reiniciar
                         </button>
                     </div>
                 </div>
-
-                <!-- System Status -->
-                <div class="system-status-card card">
-                    <div class="status-header">
-                        <i class="fas fa-shield-virus"></i> ESTADO DEL SISTEMA
-                    </div>
-                    <div class="status-indicator online">
-                        <i class="fas fa-check-circle"></i> SISTEMA EN LÍNEA
-                    </div>
-                    <div class="status-details">
-                        <div class="status-row">
-                            <span>CONEXIÓN:</span>
-                            <span class="value">SEGURA</span>
-                        </div>
-                        <div class="status-row">
-                            <span>REGISTROS:</span>
-                            <span class="value">214</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Toggle -->
-                <div class="settings-mini card">
-                    <div class="setting-item">
-                        <label><i class="fas fa-bell"></i> NOTIFICACIONES</label>
-                        <input type="checkbox" id="toggleNotif" checked>
-                    </div>
-                    <div class="setting-item">
-                        <label><i class="fas fa-volume-up"></i> SONIDO</label>
-                        <input type="checkbox" id="toggleSound" checked>
-                    </div>
-                </div>
-            </aside>
+            </section>
         </main>
 
-        <!-- Footer -->
-        <footer class="app-footer">
-            <div class="footer-left">
-                <span><i class="fas fa-shield-alt"></i> POLICÍA NACIONAL DE COLOMBIA</span>
-                <span class="version">RNMC v2.4.0</span>
+        <!-- Panel Lateral -->
+        <aside class="sidebar">
+            <div class="panel-card">
+                <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
+                
+                <div class="setting-item">
+                    <label>Notificaciones Push</label>
+                    <label class="switch">
+                        <input type="checkbox" checked onchange="app.toggleSetting('Notificaciones', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>Sonidos de Alerta</label>
+                    <label class="switch">
+                        <input type="checkbox" checked onchange="app.toggleSetting('Sonidos', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>Modo Oscuro</label>
+                    <label class="switch">
+                        <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>Nota:</strong> Para acceder a la base de datos real RNMC, utilice el botón "Sistema Oficial". Esta plataforma es un panel de control rápido.</p>
+                </div>
             </div>
-            <div class="footer-right">
-                <span>© 2024 TODOS LOS DERECHOS RESERVADOS</span>
-            </div>
-        </footer>
+        </aside>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer"></div>
-
     <script src="js/app.js"></script>
-    <script>
-        // Registrar Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('js/sw.js')
-                    .then(reg => console.log('Service Worker registrado:', reg))
-                    .catch(err => console.error('Error al registrar SW:', err));
-            });
-        }
-    </script>
 </body>
 </html>
